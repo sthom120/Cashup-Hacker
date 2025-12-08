@@ -14,6 +14,10 @@ const DENOMS = [
   { key: "c5",  label: "5c",  value: 5,    target: 20 }
 ];
 
+// Small-denomination order for breakdowns
+// (this is the order everything is listed in)
+const COIN_KEYS = ["c2", "c1", "c50", "c20", "c10", "c5"];
+
 // Preferred & fallback swap variants (all equal value)
 const BREAK_VARIANTS = {
   n50: [
@@ -103,6 +107,24 @@ function shortageValue(diff, startIndex) {
     }
   }
   return total;
+}
+
+// Choose a single note from daily takings to break,
+// big enough to cover the total coin shortage.
+function chooseBreakNote(totalShortCents) {
+  const n5  = findDenom("n5");
+  const n10 = findDenom("n10");
+  const n20 = findDenom("n20");
+  const n50 = findDenom("n50");
+
+  if (totalShortCents <= n5.value)  return n5;
+  if (totalShortCents <= n10.value) return n10;
+  if (totalShortCents <= n20.value) return n20;
+  if (totalShortCents <= n50.value) return n50;
+
+  // If the shortage is somehow larger than $50,
+  // we’ll fall back to the generic message later.
+  return null;
 }
 
 //------------------------------------------
@@ -195,7 +217,7 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
   }
 
   //-------------------------------
-  // BUILD GROUPED SWAP STEPS
+  // BUILD GROUPED SWAP STEPS (PHASE 1)
   //-------------------------------
   Object.keys(breakUsage).forEach(key => {
     const times = breakUsage[key];
@@ -255,39 +277,107 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
 
   //-------------------------------
   // PHASE 3: HANDLE REMAINING SHORTAGES
+  // (full breakdown chain from daily takings)
   //-------------------------------
   const remainingShortages = DENOMS.filter(d => diff[d.key] < 0);
 
-  if (remainingShortages.length > 0) {
-    // SPECIAL CASE: exactly Short 1 × 5c → explain how to break $1
-    if (
-      remainingShortages.length === 1 &&
-      remainingShortages[0].key === "c5" &&
-      diff["c5"] === -1
-    ) {
+  // Split into coin-range shortages vs anything else
+  const coinShortages = COIN_KEYS
+    .map(key => {
+      const amount = diff[key] < 0 ? -diff[key] : 0;
+      return { key, amount };
+    })
+    .filter(entry => entry.amount > 0);
+
+  const nonCoinShortages = remainingShortages.filter(
+    d => !COIN_KEYS.includes(d.key)
+  );
+
+  // --- 3A: Full coin breakdown step where possible ---
+  if (coinShortages.length > 0) {
+    const totalShortCents = coinShortages.reduce((sum, entry) => {
+      const d = findDenom(entry.key);
+      return sum + entry.amount * d.value;
+    }, 0);
+
+    const breakNote = chooseBreakNote(totalShortCents);
+
+    if (breakNote) {
+      // Build the full coin mix for the broken note
+      let leftover = breakNote.value - totalShortCents;
+
+      const coinsFromBreak = {};
+      COIN_KEYS.forEach(key => {
+        const denom = findDenom(key);
+        const shortageEntry = coinShortages.find(s => s.key === key);
+        const needed = shortageEntry ? shortageEntry.amount : 0;
+
+        const extra = Math.floor(leftover / denom.value);
+        coinsFromBreak[key] = needed + extra;
+        leftover -= extra * denom.value;
+      });
+
+      // Lines for "float is missing"
+      const missingLines = coinShortages
+        .map(entry => {
+          const d = findDenom(entry.key);
+          return `- ${entry.amount} × ${d.label}`;
+        })
+        .join("<br>");
+
+      // Lines for "take out in coins" (all coins from the break)
+      const allCoinsLines = COIN_KEYS
+        .filter(key => coinsFromBreak[key] > 0)
+        .map(key => {
+          const d = findDenom(key);
+          return `- ${coinsFromBreak[key]} × ${d.label}`;
+        })
+        .join("<br>");
+
+      // Lines for "add to the float" (exact shortages only)
+      const floatCoinsLines = COIN_KEYS
+        .map(key => {
+          const shortageEntry = coinShortages.find(s => s.key === key);
+          const needed = shortageEntry ? shortageEntry.amount : 0;
+          if (!needed) return "";
+          const d = findDenom(key);
+          return `- ${needed} × ${d.label}`;
+        })
+        .filter(Boolean)
+        .join("<br>");
+
+      // Lines for "remaining coins back to takings"
+      const takingsExtraLines = COIN_KEYS
+        .map(key => {
+          const shortageEntry = coinShortages.find(s => s.key === key);
+          const needed = shortageEntry ? shortageEntry.amount : 0;
+          const total = coinsFromBreak[key] || 0;
+          const extra = total - needed;
+          if (extra <= 0) return "";
+          const d = findDenom(key);
+          return `- ${extra} × ${d.label}`;
+        })
+        .filter(Boolean)
+        .join("<br>");
+
       const text = `
-To fix the 5c shortage:
+⚠️ The float is still short in some smaller denominations.<br><br>
+The float is missing:<br>
+${missingLines}<br><br>
 
-The float is missing:
-- 1 × 5c<br><br>
+To fix this in one go, break <strong>1 × ${breakNote.label}</strong> from today's daily takings into smaller change:<br><br>
 
-Break a $1 coin from today's daily takings:
+🟥 Put into the cash bag:<br>
+- 1 × ${breakNote.label}<br><br>
 
-🟥 Put into the cash bag:
-- 1 × $1<br><br>
+🟩 Take out in coins:<br>
+${allCoinsLines}<br><br>
 
-🟩 Take out from the cash bag:
-- 1 × 50c<br>
-- 2 × 20c<br>
-- 2 × 5c<br><br>
+🟢 Add to the float (these are the exact missing coins):<br>
+${floatCoinsLines}<br><br>
 
-🟢 Add to the float:
-- 1 × 5c<br><br>
-
-🟦 Put the rest into daily takings:
-- 1 × 50c<br>
-- 2 × 20c<br>
-- 1 × 5c
+🟦 Put the remaining coins back into daily takings:<br>
+${takingsExtraLines || "- (none, all coins went to the float)"}
       `.trim();
 
       steps.push({
@@ -297,8 +387,12 @@ Break a $1 coin from today's daily takings:
         currentIndex: 0
       });
       stepNumber++;
+
+      // We *don't* update diff here, because this is a
+      // "from daily takings" instruction only – the float
+      // diff has already been fully accounted for above.
     } else {
-      // generic grouped warning for any other shortages
+      // Shortage too large for a single note – generic message fallback
       const lines = remainingShortages
         .map(d => `- ${Math.abs(diff[d.key])} × ${d.label}`)
         .join("<br>");
@@ -307,7 +401,7 @@ Break a $1 coin from today's daily takings:
 ⚠️ The float is still short in some denominations.<br><br>
 The float is missing:<br>
 ${lines}<br><br>
-🟦 Please <strong>break a larger note/coin from today's daily takings</strong>
+🟦 Please <strong>break larger notes/coins from today's daily takings</strong>
 into smaller change, and put these amounts into the float.
       `.trim();
 
@@ -319,6 +413,27 @@ into smaller change, and put these amounts into the float.
       });
       stepNumber++;
     }
+  } else if (remainingShortages.length > 0 || nonCoinShortages.length > 0) {
+    // --- 3B: Only non-coin shortages left → generic note message ---
+    const lines = remainingShortages
+      .map(d => `- ${Math.abs(diff[d.key])} × ${d.label}`)
+      .join("<br>");
+
+    const text = `
+⚠️ The float is still short in some denominations.<br><br>
+The float is missing:<br>
+${lines}<br><br>
+🟦 Please <strong>break a larger note from today's daily takings</strong>
+and move the missing notes into the float.
+    `.trim();
+
+    steps.push({
+      id: `step_${stepNumber}`,
+      number: stepNumber,
+      variants: [text],
+      currentIndex: 0
+    });
+    stepNumber++;
   }
 
   //-------------------------------
