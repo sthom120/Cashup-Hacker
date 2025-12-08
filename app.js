@@ -400,5 +400,49 @@ into smaller change, and put these amounts into the float.
     `;
   }
 
-  summaryBox.innerHTML += `<p style="font-size:0.8rem; color:#555;">After you follow the steps, re-count the float and press Calculate again to check everything says “Perfect!”.</p>`;
+  summaryBox.innerHTML += `<p style="font-size:0.8rem; color:#555;">After you follow the steps, re-count the float and press "Show my steps" again to check every row says “Perfect!”.</p>`;
 });
+
+// -----------------------------------------
+// FINISHED BUTTON CONFETTI + RUN ANIMATION
+// -----------------------------------------
+document.getElementById("finishedBtn").addEventListener("click", () => {
+
+  // ---- CONFETTI ----
+  for (let i = 0; i < 120; i++) {
+    createConfettiPiece();
+  }
+
+  // ---- RUNNER ----
+  const runner = document.getElementById("runnerSprite");
+  runner.classList.remove("run-slide"); // reset if clicked twice
+  void runner.offsetWidth; // force reflow
+  runner.classList.add("run-slide");
+
+  // ---- SUCCESS MESSAGE ----
+  const msg = document.getElementById("successMessage");
+  msg.classList.add("show");
+
+  // hide it after 3 seconds
+  setTimeout(() => {
+    msg.classList.remove("show");
+  }, 3000);
+});
+
+// -----------------------------------------
+// CONFETTI GENERATOR
+// -----------------------------------------
+function createConfettiPiece() {
+  const confetti = document.createElement("div");
+  confetti.classList.add("confetti");
+
+  // randomize position, duration, opacity
+  confetti.style.left = Math.random() * 100 + "vw";
+  confetti.style.animationDuration = 2 + Math.random() * 3 + "s";
+  confetti.style.opacity = Math.random() + 0.3;
+
+  document.body.appendChild(confetti);
+
+  // remove after falling
+  setTimeout(() => confetti.remove(), 5000);
+}

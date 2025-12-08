@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
   <!-- THEME COLOURS -->
-  <meta name="theme-color" content="#3a5ad9" />
+  <meta name="theme-color" content="#6a1b9a" />
 
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -22,7 +22,7 @@
   <main class="app">
     <header class="app-header">
       <h1>Cash-up Hacker</h1>
-      <p class="subtitle">Step-by-step float helper for Australian tills</p>
+      <p class="subtitle">Step-by-step float helper</p>
     </header>
 
     <!-- LEGEND / KEY -->
@@ -86,8 +86,7 @@
       <div class="steps-header">
         <h2>2. Follow the steps</h2>
         <p class="steps-hint">
-          Start at Step 1 and do each line in order. When you finish, re-count the float and press
-          <strong>“Show my steps”</strong> again to check everything says “Perfect!”.
+          Start at Step 1 and do each line in order. When you finish, count your takings and check they match what is calculated above.
         </p>
       </div>
       <div id="stepsList">
@@ -102,8 +101,20 @@
         <!-- Summary text appears here -->
       </div>
     </section>
+
+    <!-- FINISHED BUTTON -->
+    <button id="finishedBtn" class="finished-btn">Finished!</button>
   </main>
 
+  <!-- Running woman animation container -->
+  <div id="runnerContainer">
+    <img id="runnerSprite" src="images/runner.png" alt="Runner going home">
+  </div>
+
+  <!-- Success message bubble -->
+  <div id="successMessage">Float balanced! Time to go home 😊</div>
+
+  <!-- APP LOGIC -->
   <script src="app.js"></script>
 
   <!-- REGISTER SERVICE WORKER -->

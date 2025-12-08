@@ -2,26 +2,36 @@
    ROOT + GLOBAL
    ========================================= */
 :root {
-  --bg-page: #f5f7fb;
-  --bg-card: #ffffff;
-  --bg-soft: #f9fafc;
+  /* Backgrounds */
+  --bg-page: #faf7ff;          /* ultra-soft lavender tint */
+  --bg-card: #ffffff;          /* clean white */
+  --bg-soft: #f6f0fa;          /* soft lilac */
 
-  --border-soft: #dde3f4;
-  --border-strong: #3a5ad9;
+  /* Borders */
+  --border-soft: #e6d9ef;      /* light pastel lavender */
+  --border-strong: #6a1b9a;    /* Amazen purple */
 
-  --text-main: #222;
+  /* Text colours */
+  --text-main: #2a2a2a;
   --text-soft: #555;
   --text-muted: #777;
 
-  --accent-main: #3a5ad9;
-  --accent-good: #1b8753;
-  --accent-warn: #c86a11;
-  --accent-bad: #c62828;
+  /* ACCENTS — core brand colours */
+  --accent-main: #6a1b9a;      /* MAIN Amazen purple */
+  --accent-good: #00a651;      /* friendly green for “Perfect!” */
+  --accent-warn: #fbb040;      /* Amazen warm yellow */
+  --accent-bad: #b71c1c;       /* deep red for errors (good contrast) */
 
+  /* Secondary Amazen colours */
+  --accent-blue: #00aeef;      /* bright Amazen cyan */
+  --accent-yellow: #fbb040;    /* Amazen warm yellow */
+
+  /* UI shape constants */
   --radius-card: 1rem;
   --radius-pill: 999px;
 
-  --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.07);
+  /* Soft shadow with a purple tint */
+  --shadow-soft: 0 4px 14px rgba(106, 27, 154, 0.10);
 }
 
 * {
@@ -215,7 +225,7 @@ button {
   margin-bottom: 0.85rem;
   background: var(--accent-main);
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(58, 90, 217, 0.25);
+  box-shadow: 0 2px 6px rgba(106, 27, 154, 0.25);
 }
 
 #calculateBtn:active {
@@ -223,7 +233,7 @@ button {
 }
 
 #calculateBtn:focus-visible {
-  outline: 2px solid #1f3fb0;
+  outline: 2px solid #4b1370;
   outline-offset: 2px;
 }
 
@@ -326,6 +336,119 @@ button {
 .placeholder {
   font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+/* ================================
+   FINISHED BUTTON
+   ================================ */
+.finished-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--accent-main);
+  color: #fff;
+  font-size: 1.1rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(106, 27, 154, 0.25);
+  transition: transform 0.1s ease;
+}
+
+.finished-btn:active {
+  transform: scale(0.97);
+}
+
+/* ================================
+   RUNNER ANIMATION
+   ================================ */
+#runnerContainer {
+  position: fixed;
+  bottom: 40px;
+  left: -200px; /* starts off-screen */
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#runnerSprite {
+  width: 100%;
+  height: auto;
+  opacity: 0;
+}
+
+.run-slide {
+  animation: runAcross 3s ease-out forwards;
+}
+
+@keyframes runAcross {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120vw);
+    opacity: 0.3;
+  }
+}
+
+/* ================================
+   CONFETTI
+   ================================ */
+.confetti {
+  position: fixed;
+  top: -10px;
+  width: 10px;
+  height: 14px;
+  background-color: #6a1b9a; /* purple */
+  z-index: 9999;
+  border-radius: 2px;
+  animation: fallConfetti linear forwards;
+}
+
+/* Half of confetti pieces will be yellow */
+.confetti:nth-child(odd) {
+  background-color: #fbb040; /* Amazen yellow */
+}
+
+@keyframes fallConfetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+/* ================================
+   SUCCESS MESSAGE BUBBLE
+   ================================ */
+#successMessage {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-main);
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  border-radius: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(106, 27, 154, 0.22);
+  opacity: 0;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#successMessage.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-10px);
 }
 
 /* =========================================
