@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cash-up Hacker (AUD Float Helper)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PWA MANIFEST -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- APP ICONS -->
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- THEME COLOURS -->
+  <meta name="theme-color" content="#3a5ad9" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="app">
+    <header class="app-header">
+      <h1>Cash-up Hacker</h1>
+      <p class="subtitle">Step-by-step float helper for Australian tills</p>
+    </header>
+
+    <!-- LEGEND / KEY -->
+    <section class="legend" aria-label="Legend for symbols">
+      <h2 class="legend-title">How to read the steps</h2>
+      <div class="legend-grid">
+        <div class="legend-item">
+          <span class="legend-emoji">🟥</span>
+          <span class="legend-text"><strong>Put into cash bag</strong> (for breaking notes/coins)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-emoji">🟩</span>
+          <span class="legend-text"><strong>Take out from cash bag</strong> (new change you get)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-emoji">🟢</span>
+          <span class="legend-text"><strong>Add to float</strong> (must stay in the till)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-emoji">🟦</span>
+          <span class="legend-text"><strong>Daily takings</strong> (goes to bank / counted as takings)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-emoji">⚠️</span>
+          <span class="legend-text"><strong>Warning / still short</strong> – follow carefully</span>
+        </div>
+      </div>
+      <p class="legend-hint">
+        Tip: read each step out loud and do one coloured block at a time.
+      </p>
+    </section>
+
+    <!-- FLOAT INPUT TABLE -->
+    <section class="float-section" aria-label="Float input">
+      <h2 class="section-title">1. Enter what is in the till now</h2>
+      <p class="section-help">
+        Count each note and coin in the till at the end of the day, then type the number into the matching box.
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Denomination</th>
+              <th>In till now</th>
+              <th>Target</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="denomRows">
+            <!-- rows are added by app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <button id="calculateBtn" type="button">🧮 Show my steps</button>
+    </section>
+
+    <!-- STEPS -->
+    <section class="steps" aria-label="Step-by-step instructions">
+      <div class="steps-header">
+        <h2>2. Follow the steps</h2>
+        <p class="steps-hint">
+          Start at Step 1 and do each line in order. When you finish, re-count the float and press
+          <strong>“Show my steps”</strong> again to check everything says “Perfect!”.
+        </p>
+      </div>
+      <div id="stepsList">
+        <!-- Steps appear here -->
+      </div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section class="summary" aria-label="Totals">
+      <h2>3. Check totals</h2>
+      <div id="summaryBox">
+        <!-- Summary text appears here -->
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+
+  <!-- REGISTER SERVICE WORKER -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("service-worker.js")
+        .then(() => console.log("Service Worker registered"))
+        .catch(err => console.log("SW registration failed:", err));
+    }
+  </script>
+</body>
+</html>

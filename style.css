@@ -1,0 +1,355 @@
+/* =========================================
+   ROOT + GLOBAL
+   ========================================= */
+:root {
+  --bg-page: #f5f7fb;
+  --bg-card: #ffffff;
+  --bg-soft: #f9fafc;
+
+  --border-soft: #dde3f4;
+  --border-strong: #3a5ad9;
+
+  --text-main: #222;
+  --text-soft: #555;
+  --text-muted: #777;
+
+  --accent-main: #3a5ad9;
+  --accent-good: #1b8753;
+  --accent-warn: #c86a11;
+  --accent-bad: #c62828;
+
+  --radius-card: 1rem;
+  --radius-pill: 999px;
+
+  --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+
+/* =========================================
+   APP CONTAINER
+   ========================================= */
+.app {
+  max-width: 720px;
+  margin: 0 auto 2rem auto;
+  background: var(--bg-card);
+  border-radius: 1.2rem;
+  padding: 1rem 1.2rem 1.4rem;
+  box-shadow: var(--shadow-soft);
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+.app-header {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.app-header h1 {
+  font-size: 1.6rem;
+  margin: 0 0 0.2rem 0;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+/* =========================================
+   LEGEND
+   ========================================= */
+.legend {
+  background: var(--bg-soft);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-soft);
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.legend-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  min-width: 45%;
+}
+
+.legend-emoji {
+  font-size: 1rem;
+}
+
+.legend-text strong {
+  font-weight: 600;
+}
+
+.legend-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* =========================================
+   SECTIONS
+   ========================================= */
+.section-title {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.1rem;
+}
+
+.section-help {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+/* =========================================
+   TABLE
+   ========================================= */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 0.3rem 0 0.7rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 0.35rem 0.4rem;
+  text-align: left;
+}
+
+th {
+  border-bottom: 1px solid #d7dce8;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+td.denom {
+  width: 3.5rem;
+  font-weight: 600;
+}
+
+td input {
+  width: 3.3rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 0.45rem;
+  border: 1px solid #c9cfdf;
+  background: #ffffff;
+}
+
+td input:focus {
+  outline: 2px solid var(--accent-main);
+  outline-offset: 1px;
+}
+
+td.status {
+  font-size: 0.85rem;
+}
+
+/* STATUS COLOURS */
+.status-perfect {
+  color: var(--accent-good);
+  font-weight: 600;
+}
+
+.status-action {
+  color: var(--accent-warn);
+  font-weight: 600;
+}
+
+.status-problem {
+  color: var(--accent-bad);
+  font-weight: 600;
+}
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+button {
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 1rem;
+  font-size: 0.92rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#calculateBtn {
+  width: 100%;
+  margin-bottom: 0.85rem;
+  background: var(--accent-main);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(58, 90, 217, 0.25);
+}
+
+#calculateBtn:active {
+  transform: scale(0.98);
+}
+
+#calculateBtn:focus-visible {
+  outline: 2px solid #1f3fb0;
+  outline-offset: 2px;
+}
+
+.alt-btn {
+  margin-left: 0.4rem;
+  background: #eef1fb;
+  color: #222;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+}
+
+/* =========================================
+   STEPS
+   ========================================= */
+.steps {
+  background: var(--bg-soft);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-soft);
+  padding: 0.8rem 0.9rem 0.7rem;
+  margin-bottom: 0.85rem;
+}
+
+.steps-header h2 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1rem;
+}
+
+.steps-hint {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+/* Individual step card */
+.step {
+  margin-bottom: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border-left: 5px solid var(--accent-main);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.step-number {
+  display: block;
+  font-weight: 700;
+  color: var(--accent-main);
+  margin-bottom: 0.15rem;
+}
+
+.step-text {
+  display: block;
+  color: var(--text-main);
+}
+
+/* Make lists / bullet-like lines inside steps easier to scan */
+.step-text br + br {
+  line-height: 1.0;
+}
+
+.step-text strong {
+  font-weight: 700;
+}
+
+/* =========================================
+   SUMMARY
+   ========================================= */
+.summary {
+  font-size: 0.9rem;
+  background: var(--bg-soft);
+  border-radius: var(--radius-card);
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border-soft);
+}
+
+.summary h2 {
+  margin: 0 0 0.4rem 0;
+  font-size: 1rem;
+}
+
+.summary p {
+  margin: 0.25rem 0;
+}
+
+.summary .good {
+  color: var(--accent-good);
+  font-weight: 600;
+}
+
+.summary .warn {
+  color: var(--accent-bad);
+  font-weight: 600;
+}
+
+/* =========================================
+   PLACEHOLDER
+   ========================================= */
+.placeholder {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* =========================================
+   MOBILE TWEAKS
+   ========================================= */
+@media (max-width: 480px) {
+  .app {
+    padding: 0.9rem 0.7rem 1.1rem;
+    border-radius: 0.9rem;
+  }
+
+  td.denom {
+    width: 3rem;
+  }
+
+  td input {
+    width: 3rem;
+  }
+
+  .legend-grid {
+    flex-direction: column;
+  }
+
+  .legend-item {
+    min-width: 100%;
+  }
+}
