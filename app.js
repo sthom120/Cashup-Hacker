@@ -2,80 +2,57 @@
 // CONFIGURATION
 //------------------------------------------
 const DENOMS = [
-  { key: "n50", label: "$50", value: 5000, target: 1 },
-  { key: "n20", label: "$20", value: 2000, target: 10 },
-  { key: "n10", label: "$10", value: 1000, target: 10 },
-  { key: "n5",  label: "$5",  value: 500,  target: 10 },
-  { key: "c2",  label: "$2",  value: 200,  target: 15 },
-  { key: "c1",  label: "$1",  value: 100,  target: 11 },
-  { key: "c50", label: "50c", value: 50,   target: 10 },
-  { key: "c20", label: "20c", value: 20,   target: 10 },
-  { key: "c10", label: "10c", value: 10,   target: 10 },
-  { key: "c5",  label: "5c",  value: 5,    target: 20 }
+  { key: "n50", label: "$50", value: 5000, target: 1,  type: "note" },
+  { key: "n20", label: "$20", value: 2000, target: 10, type: "note" },
+  { key: "n10", label: "$10", value: 1000, target: 10, type: "note" },
+  { key: "n5",  label: "$5",  value: 500,  target: 10, type: "note" },
+  { key: "c2",  label: "$2",  value: 200,  target: 15, type: "coin" },
+  { key: "c1",  label: "$1",  value: 100,  target: 11, type: "coin" },
+  { key: "c50", label: "50c", value: 50,   target: 10, type: "coin" },
+  { key: "c20", label: "20c", value: 20,   target: 10, type: "coin" },
+  { key: "c10", label: "10c", value: 10,   target: 10, type: "coin" },
+  { key: "c5",  label: "5c",  value: 5,    target: 20, type: "coin" }
 ];
 
-// Small-denomination order for breakdowns
-// (this is the order everything is listed in)
+// Note keys (we can break these)
+const NOTE_KEYS = ["n5", "n10", "n20", "n50"];
+
+// Coins in AUD "thinking order"
 const COIN_KEYS = ["c2", "c1", "c50", "c20", "c10", "c5"];
 
-// Preferred & fallback swap variants (all equal value)
-const BREAK_VARIANTS = {
-  n50: [
-    [ { denomKey: "n20", count: 2 }, { denomKey: "n10", count: 1 } ],
-    [ { denomKey: "n20", count: 1 }, { denomKey: "n10", count: 3 } ],
-    [ { denomKey: "n10", count: 5 } ]
-  ],
-  n20: [
-    [ { denomKey: "n10", count: 2 } ],
-    [ { denomKey: "n10", count: 1 }, { denomKey: "n5", count: 2 } ]
-  ],
-  n10: [
-    [ { denomKey: "n5", count: 2 } ],
-    [ { denomKey: "n5", count: 1 }, { denomKey: "c1", count: 5 } ]
-  ],
-  n5: [
-    [ { denomKey: "c1", count: 5 } ],
-    [ { denomKey: "c2", count: 2 }, { denomKey: "c1", count: 1 } ]
-  ],
-  c2: [
-    [ { denomKey: "c1", count: 2 } ],
-    [ { denomKey: "c1", count: 1 }, { denomKey: "c50", count: 2 } ]
-  ],
-  c1: [
-    [ { denomKey: "c50", count: 2 } ],
-    [ { denomKey: "c50", count: 1 }, { denomKey: "c20", count: 2 }, { denomKey: "c10", count: 1 } ]
-  ],
-  c50: [
-    [ { denomKey: "c20", count: 2 }, { denomKey: "c10", count: 1 } ],
-    [ { denomKey: "c10", count: 5 } ]
-  ],
-  c20: [
-    [ { denomKey: "c10", count: 2 } ],
-    [ { denomKey: "c10", count: 1 }, { denomKey: "c5", count: 2 } ]
-  ],
-  c10: [
-    [ { denomKey: "c5", count: 2 } ]
-  ]
-};
-
 //------------------------------------------
-// APP SETUP
+// APP SETUP: build the main till table
 //------------------------------------------
 const rowsContainer = document.getElementById("denomRows");
 
-// Build table rows dynamically
 DENOMS.forEach(denom => {
   const tr = document.createElement("tr");
-
   tr.innerHTML = `
     <td class="denom">${denom.label}</td>
     <td><input type="number" min="0" id="input_${denom.key}"></td>
     <td>${denom.target}</td>
     <td id="status_${denom.key}" class="status"></td>
   `;
-
   rowsContainer.appendChild(tr);
 });
+
+// -----------------------------------------
+// OPTIONAL: Build the takings double-check table
+// (requires a <tbody id="takingsCheckRows"> in your HTML)
+// -----------------------------------------
+const takingsCheckBody = document.getElementById("takingsCheckRows");
+if (takingsCheckBody) {
+  DENOMS.forEach(denom => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="denom">${denom.label}</td>
+      <td>
+        <input type="number" min="0" id="check_takings_${denom.key}">
+      </td>
+    `;
+    takingsCheckBody.appendChild(tr);
+  });
+}
 
 //------------------------------------------
 // HELPERS
@@ -89,56 +66,31 @@ function centsToDollars(cents) {
   return sign + "$" + dollars + "." + centsStr;
 }
 
-function hasAnyShortage(diff) {
-  return DENOMS.some(d => diff[d.key] < 0);
-}
-
 function findDenom(key) {
   return DENOMS.find(d => d.key === key);
 }
 
-function shortageValue(diff, startIndex) {
-  // sum of value of shortages from startIndex downward
-  let total = 0;
-  for (let i = startIndex; i < DENOMS.length; i++) {
-    const d = DENOMS[i];
-    if (diff[d.key] < 0) {
-      total += (-diff[d.key]) * d.value;
-    }
-  }
-  return total;
-}
-
-// Choose a single note from daily takings to break,
-// big enough to cover the total coin shortage.
+// Choose the smallest note that can fully cover the total shortage value.
 function chooseBreakNote(totalShortCents) {
-  const n5  = findDenom("n5");
-  const n10 = findDenom("n10");
-  const n20 = findDenom("n20");
-  const n50 = findDenom("n50");
-
-  if (totalShortCents <= n5.value)  return n5;
-  if (totalShortCents <= n10.value) return n10;
-  if (totalShortCents <= n20.value) return n20;
-  if (totalShortCents <= n50.value) return n50;
-
-  // If the shortage is somehow larger than $50,
-  // we’ll fall back to the generic message later.
-  return null;
+  for (const key of NOTE_KEYS) {
+    const d = findDenom(key);
+    if (totalShortCents <= d.value) return d;
+  }
+  // If somehow larger than $50, just use a $50
+  return findDenom("n50");
 }
 
 //------------------------------------------
 // MAIN: CALCULATE STEPS
 //------------------------------------------
-document.getElementById("calculateBtn").addEventListener("click", () => {
+let lastExpectedTakingsCents = 0; // used for double-check
 
-  //-------------------------------
-  // STEP 1: Read inputs
-  //-------------------------------
+document.getElementById("calculateBtn").addEventListener("click", () => {
   const counts = {};
   let totalActual = 0;
   let totalTarget = 0;
 
+  // 1. Read inputs & totals
   DENOMS.forEach(d => {
     const val = parseInt(document.getElementById(`input_${d.key}`).value) || 0;
     counts[d.key] = val;
@@ -146,120 +98,21 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
     totalTarget += d.target * d.value;
   });
 
-  //-------------------------------
-  // STEP 2: Base diff (for status)
-  //-------------------------------
-  const baseDiff = {};
-  DENOMS.forEach(d => {
-    baseDiff[d.key] = counts[d.key] - d.target;
-  });
-
-  //-------------------------------
-  // STEP 3: Working diff (for algorithm)
-  //-------------------------------
+  // 2. Differences (till - target)
   const diff = {};
   DENOMS.forEach(d => {
-    diff[d.key] = baseDiff[d.key];
+    diff[d.key] = counts[d.key] - d.target;
   });
 
   const steps = [];
   let stepNumber = 1;
 
-  // track how many times we break each higher denom
-  const breakUsage = {};
-  DENOMS.forEach(d => (breakUsage[d.key] = 0));
-
-  //-------------------------------
-  // PHASE 1: USE EXCESS TO FIX SHORTAGES (grouped)
-  //-------------------------------
-  for (let i = 0; i < DENOMS.length; i++) {
-    const higher = DENOMS[i];
-    const key = higher.key;
-
-    while (diff[key] > 0 && hasAnyShortage(diff)) {
-      // Is any lower denomination short?
-      let lowerShort = false;
-      for (let j = i + 1; j < DENOMS.length; j++) {
-        if (diff[DENOMS[j].key] < 0) {
-          lowerShort = true;
-          break;
-        }
-      }
-      if (!lowerShort) break;
-
-      const variants = BREAK_VARIANTS[key];
-      if (!variants) break;
-
-      const chosen = variants[0];
-
-      const before = shortageValue(diff, i + 1);
-
-      // try breaking one note/coin of this denom
-      diff[key] -= 1;
-      chosen.forEach(part => {
-        diff[part.denomKey] += part.count;
-      });
-
-      const after = shortageValue(diff, i + 1);
-
-      if (after < before) {
-        // this break actually helped → keep it
-        breakUsage[key] += 1;
-      } else {
-        // revert & stop breaking this denom
-        diff[key] += 1;
-        chosen.forEach(part => {
-          diff[part.denomKey] -= part.count;
-        });
-        break;
-      }
-    }
-  }
-
-  //-------------------------------
-  // BUILD GROUPED SWAP STEPS (PHASE 1)
-  //-------------------------------
-  Object.keys(breakUsage).forEach(key => {
-    const times = breakUsage[key];
-    if (times <= 0) return;
-
-    const higher = findDenom(key);
-    const variants = BREAK_VARIANTS[key];
-
-    const variantTexts = variants.map(v => {
-      const partsText = v
-        .map(part => {
-          const d = findDenom(part.denomKey);
-          const totalCount = part.count * times;
-          return `${totalCount} × ${d.label}`;
-        })
-        .join(", ");
-
-      return `
-🟥 Put into the cash bag: <strong>${times} × ${higher.label}</strong><br>
-🟩 Take out from the cash bag and add to the float: <strong>${partsText}</strong>
-      `.trim();
-    });
-
-    steps.push({
-      id: `step_${stepNumber}`,
-      number: stepNumber,
-      variants: variantTexts,
-      currentIndex: 0
-    });
-    stepNumber++;
-  });
-
-  //-------------------------------
-  // PHASE 2: REMOVE FINAL EXCESS AS TAKINGS (grouped)
-  //-------------------------------
-  let takings = 0;
-
+  //--------------------------------
+  // STEP A: remove all extras to takings
+  //--------------------------------
   DENOMS.forEach(d => {
-    if (diff[d.key] > 0) {
-      const extra = diff[d.key];
-      takings += extra * d.value;
-
+    const extra = diff[d.key];
+    if (extra > 0) {
       const text = `
 🟦 Remove from the float and place into <strong>daily takings</strong>:
 <strong>${extra} × ${d.label}</strong>
@@ -267,204 +120,228 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
 
       steps.push({
         id: `step_${stepNumber}`,
-        number: stepNumber,
-        variants: [text],
-        currentIndex: 0
+        number: stepNumber++,
+        text
       });
-      stepNumber++;
     }
   });
 
-  //-------------------------------
-  // PHASE 3: HANDLE REMAINING SHORTAGES
-  // (full breakdown chain from daily takings)
-  //-------------------------------
-  const remainingShortages = DENOMS.filter(d => diff[d.key] < 0);
+ //--------------------------------
+// STEP B: handle note shortages (now with recommended exchange advice)
+//--------------------------------
+DENOMS.forEach(d => {
+  if (d.type === "note" && diff[d.key] < 0) {
+    const short = Math.abs(diff[d.key]);
 
-  // Split into coin-range shortages vs anything else
-  const coinShortages = COIN_KEYS
-    .map(key => {
-      const amount = diff[key] < 0 ? -diff[key] : 0;
-      return { key, amount };
-    })
-    .filter(entry => entry.amount > 0);
+    // choose a recommended note to break
+    // If short is 1–2, usually break the next note up
+    let recommendedBreak = null;
+    let recommendedYield = 0;
 
-  const nonCoinShortages = remainingShortages.filter(
-    d => !COIN_KEYS.includes(d.key)
-  );
+    // Decide recommended note:
+    // e.g., to get $5 notes → break a $10 (gives 2×$5)
+    //       to get $10 notes → break a $20 (gives 2×$10)
+    //       to get $20 notes → break a $50 (gives 2×$20 + $10 but we can simplify)
+    if (d.key === "n5") {
+      recommendedBreak = findDenom("n10");
+      recommendedYield = 2; // from one $10 → two $5
+    } else if (d.key === "n10") {
+      recommendedBreak = findDenom("n20");
+      recommendedYield = 2; // one $20 → two $10
+    } else if (d.key === "n20") {
+      recommendedBreak = findDenom("n50");
+      recommendedYield = 2; // one $50 → two $20 (simplified advice)
+    } else {
+      recommendedBreak = null; // for $50 shortages we just take $50s directly
+    }
 
-  // --- 3A: Full coin breakdown step where possible ---
-  if (coinShortages.length > 0) {
-    const totalShortCents = coinShortages.reduce((sum, entry) => {
-      const d = findDenom(entry.key);
-      return sum + entry.amount * d.value;
-    }, 0);
+    // Build main instruction
+    let text = `
+🟢 Add to the float from today's daily takings:
+<strong>${short} × ${d.label}</strong>
+`.trim();
 
-    const breakNote = chooseBreakNote(totalShortCents);
+    // Add recommended advice if applicable
+    if (recommendedBreak) {
+      const rLabel = recommendedBreak.label;
 
-    if (breakNote) {
-      // Build the full coin mix for the broken note
-      let leftover = breakNote.value - totalShortCents;
+      // If yield = exact number needed (like 2)
+      if (recommendedYield === short) {
+        text += `
+<br><br>
+💡 <strong>Recommended:</strong><br>
+Break <strong>1 × ${rLabel}</strong> in the cash bag → Take <strong>${short} × ${d.label}</strong>.
+        `.trim();
+      }
 
-      const coinsFromBreak = {};
-      COIN_KEYS.forEach(key => {
-        const denom = findDenom(key);
-        const shortageEntry = coinShortages.find(s => s.key === key);
-        const needed = shortageEntry ? shortageEntry.amount : 0;
+      // If yield produces MORE than needed (overflow into takings)
+      else if (recommendedYield > short) {
+        const overflow = recommendedYield - short;
+        text += `
+<br><br>
+💡 <strong>Recommended:</strong><br>
+Break <strong>1 × ${rLabel}</strong> in the cash bag → Take <strong>${recommendedYield} × ${d.label}</strong>.<br>
+Use <strong>${short}</strong> for the float, put <strong>${overflow}</strong> into takings.
+        `.trim();
+      }
+    }
 
-        const extra = Math.floor(leftover / denom.value);
-        coinsFromBreak[key] = needed + extra;
-        leftover -= extra * denom.value;
-      });
+    steps.push({
+      id: `step_${stepNumber}`,
+      number: stepNumber++,
+      text
+    });
+  }
+});
 
-      // Lines for "float is missing"
-      const missingLines = coinShortages
-        .map(entry => {
-          const d = findDenom(entry.key);
-          return `- ${entry.amount} × ${d.label}`;
-        })
-        .join("<br>");
 
-      // Lines for "take out in coins" (all coins from the break)
-      const allCoinsLines = COIN_KEYS
-        .filter(key => coinsFromBreak[key] > 0)
-        .map(key => {
-          const d = findDenom(key);
-          return `- ${coinsFromBreak[key]} × ${d.label}`;
-        })
-        .join("<br>");
+  //--------------------------------
+  // STEP C: handle coin shortages with ONE smart breakdown
+  //--------------------------------
+  const coinShortages = {};
+  let totalCoinShortCents = 0;
 
-      // Lines for "add to the float" (exact shortages only)
-      const floatCoinsLines = COIN_KEYS
-        .map(key => {
-          const shortageEntry = coinShortages.find(s => s.key === key);
-          const needed = shortageEntry ? shortageEntry.amount : 0;
-          if (!needed) return "";
-          const d = findDenom(key);
-          return `- ${needed} × ${d.label}`;
-        })
-        .filter(Boolean)
-        .join("<br>");
+  COIN_KEYS.forEach(key => {
+    if (diff[key] < 0) {
+      const shortCount = Math.abs(diff[key]);
+      coinShortages[key] = shortCount;
+      const d = findDenom(key);
+      totalCoinShortCents += shortCount * d.value;
+    }
+  });
 
-      // Lines for "remaining coins back to takings"
-      const takingsExtraLines = COIN_KEYS
-        .map(key => {
-          const shortageEntry = coinShortages.find(s => s.key === key);
-          const needed = shortageEntry ? shortageEntry.amount : 0;
-          const total = coinsFromBreak[key] || 0;
-          const extra = total - needed;
-          if (extra <= 0) return "";
-          const d = findDenom(key);
-          return `- ${extra} × ${d.label}`;
-        })
-        .filter(Boolean)
-        .join("<br>");
+  if (totalCoinShortCents > 0) {
+    const breakNote = chooseBreakNote(totalCoinShortCents);
 
-      const text = `
-⚠️ The float is still short in some smaller denominations.<br><br>
+    // Distribute that note value into coins:
+    let remainingValue = breakNote.value;
+
+    const addToFloat = {};      // exact missing coins we will add
+    const coinsFromBreak = {};  // all coins produced from the note
+
+    // 1) Fill shortages first (largest to smallest coin)
+    COIN_KEYS.forEach(key => {
+      const d = findDenom(key);
+      const needed = coinShortages[key] || 0;
+      if (needed <= 0 || remainingValue <= 0) return;
+
+      const maxCanGive = Math.floor(remainingValue / d.value);
+      const give = Math.min(needed, maxCanGive);
+
+      if (give > 0) {
+        addToFloat[key] = (addToFloat[key] || 0) + give;
+        coinsFromBreak[key] = (coinsFromBreak[key] || 0) + give;
+        remainingValue -= give * d.value;
+        coinShortages[key] -= give;
+      }
+    });
+
+    // 2) Use remaining value for extra coins (go straight to takings)
+    COIN_KEYS.forEach(key => {
+      const d = findDenom(key);
+      if (remainingValue <= 0) return;
+      const extra = Math.floor(remainingValue / d.value);
+      if (extra > 0) {
+        coinsFromBreak[key] = (coinsFromBreak[key] || 0) + extra;
+        remainingValue -= extra * d.value;
+      }
+    });
+
+    // Build text blocks
+    const missingLines = [];
+    COIN_KEYS.forEach(key => {
+      const originalShort = diff[key] < 0 ? Math.abs(diff[key]) : 0;
+      if (originalShort > 0) {
+        const d = findDenom(key);
+        missingLines.push(`- ${originalShort} × ${d.label}`);
+      }
+    });
+
+    const coinsFromBreakLines = [];
+    COIN_KEYS.forEach(key => {
+      const total = coinsFromBreak[key] || 0;
+      if (total > 0) {
+        const d = findDenom(key);
+        coinsFromBreakLines.push(`- ${total} × ${d.label}`);
+      }
+    });
+
+    const addToFloatLines = [];
+    COIN_KEYS.forEach(key => {
+      const give = addToFloat[key] || 0;
+      if (give > 0) {
+        const d = findDenom(key);
+        addToFloatLines.push(`- ${give} × ${d.label}`);
+      }
+    });
+
+    const extraToTakingsLines = [];
+    COIN_KEYS.forEach(key => {
+      const total = coinsFromBreak[key] || 0;
+      const give = addToFloat[key] || 0;
+      const extra = total - give;
+      if (extra > 0) {
+        const d = findDenom(key);
+        extraToTakingsLines.push(`- ${extra} × ${d.label}`);
+      }
+    });
+
+    const text = `
+⚠️ The float is still short in some coin denominations.<br><br>
 The float is missing:<br>
-${missingLines}<br><br>
+${missingLines.join("<br>")}<br><br>
 
-To fix this in one go, break <strong>1 × ${breakNote.label}</strong> from today's daily takings into smaller change:<br><br>
+To fix this in one go, break <strong>1 × ${breakNote.label}</strong> from today's daily takings into smaller coins:<br><br>
 
 🟥 Put into the cash bag:<br>
 - 1 × ${breakNote.label}<br><br>
 
 🟩 Take out in coins:<br>
-${allCoinsLines}<br><br>
+${coinsFromBreakLines.join("<br>")}<br><br>
 
-🟢 Add to the float (these are the exact missing coins):<br>
-${floatCoinsLines}<br><br>
+🟢 Add these to the float (this fixes the shortages):<br>
+${addToFloatLines.join("<br>")}<br><br>
 
-🟦 Put the remaining coins back into daily takings:<br>
-${takingsExtraLines || "- (none, all coins went to the float)"}
-      `.trim();
-
-      steps.push({
-        id: `step_${stepNumber}`,
-        number: stepNumber,
-        variants: [text],
-        currentIndex: 0
-      });
-      stepNumber++;
-
-      // We *don't* update diff here, because this is a
-      // "from daily takings" instruction only – the float
-      // diff has already been fully accounted for above.
-    } else {
-      // Shortage too large for a single note – generic message fallback
-      const lines = remainingShortages
-        .map(d => `- ${Math.abs(diff[d.key])} × ${d.label}`)
-        .join("<br>");
-
-      const text = `
-⚠️ The float is still short in some denominations.<br><br>
-The float is missing:<br>
-${lines}<br><br>
-🟦 Please <strong>break larger notes/coins from today's daily takings</strong>
-into smaller change, and put these amounts into the float.
-      `.trim();
-
-      steps.push({
-        id: `step_${stepNumber}`,
-        number: stepNumber,
-        variants: [text],
-        currentIndex: 0
-      });
-      stepNumber++;
-    }
-  } else if (remainingShortages.length > 0 || nonCoinShortages.length > 0) {
-    // --- 3B: Only non-coin shortages left → generic note message ---
-    const lines = remainingShortages
-      .map(d => `- ${Math.abs(diff[d.key])} × ${d.label}`)
-      .join("<br>");
-
-    const text = `
-⚠️ The float is still short in some denominations.<br><br>
-The float is missing:<br>
-${lines}<br><br>
-🟦 Please <strong>break a larger note from today's daily takings</strong>
-and move the missing notes into the float.
+🟦 Put the remaining coins into daily takings:<br>
+${extraToTakingsLines.length ? extraToTakingsLines.join("<br>") : "- (none, all coins went into the float)"}
     `.trim();
 
     steps.push({
       id: `step_${stepNumber}`,
-      number: stepNumber,
-      variants: [text],
-      currentIndex: 0
+      number: stepNumber++,
+      text
     });
-    stepNumber++;
   }
 
-  //-------------------------------
-  // STATUS COLUMN (based on original counts)
-  //-------------------------------
+  //--------------------------------
+  // STATUS COLUMN (quick visual)
+  //--------------------------------
   DENOMS.forEach(d => {
     const cell = document.getElementById(`status_${d.key}`);
-    const extra = baseDiff[d.key];
+    const delta = diff[d.key];
 
     cell.className = "status";
 
-    if (extra === 0) {
+    if (delta === 0) {
       cell.textContent = "Perfect!";
       cell.classList.add("status-perfect");
-    } else if (extra > 0) {
-      cell.textContent = `Extra ${extra}`;
+    } else if (delta > 0) {
+      cell.textContent = `Extra ${delta}`;
       cell.classList.add("status-action");
     } else {
-      cell.textContent = `Short ${Math.abs(extra)}`;
+      cell.textContent = `Short ${Math.abs(delta)}`;
       cell.classList.add("status-problem");
     }
   });
 
-  //-------------------------------
+  //--------------------------------
   // DISPLAY STEPS
-  //-------------------------------
+  //--------------------------------
   const stepsList = document.getElementById("stepsList");
   stepsList.innerHTML = "";
 
   if (steps.length === 0) {
-    stepsList.innerHTML = `<p class="placeholder">No swaps needed.</p>`;
+    stepsList.innerHTML = `<p class="placeholder">No swaps needed. Your float is already perfect!</p>`;
   } else {
     steps.forEach(step => {
       const div = document.createElement("div");
@@ -478,48 +355,84 @@ and move the missing notes into the float.
 
       const textSpan = document.createElement("span");
       textSpan.className = "step-text";
-      textSpan.innerHTML = step.variants[0]; // allows <br> + bold
+      textSpan.innerHTML = step.text;
       div.appendChild(textSpan);
-
-      if (step.variants.length > 1) {
-        const altBtn = document.createElement("button");
-        altBtn.className = "alt-btn";
-        altBtn.textContent = "Swap not possible?";
-        altBtn.addEventListener("click", () => {
-          step.currentIndex = (step.currentIndex + 1) % step.variants.length;
-          textSpan.innerHTML = step.variants[step.currentIndex];
-        });
-        div.appendChild(altBtn);
-      }
 
       stepsList.appendChild(div);
     });
   }
 
-  //-------------------------------
-  // SUMMARY BOX
-  //-------------------------------
+  //--------------------------------
+  // SUMMARY BOX + expected takings
+  //--------------------------------
   const summaryBox = document.getElementById("summaryBox");
   summaryBox.innerHTML = `
     <p><strong>Total in till now:</strong> ${centsToDollars(totalActual)}</p>
     <p><strong>Target float total:</strong> ${centsToDollars(totalTarget)}</p>
   `;
 
-  if (totalActual < totalTarget) {
+  const diffTotal = totalActual - totalTarget;
+  lastExpectedTakingsCents = diffTotal; // store for double-check use
+
+  if (diffTotal < 0) {
     summaryBox.innerHTML += `
-      <p class="warn">Till is short overall by ${centsToDollars(totalTarget - totalActual)}.</p>
+      <p class="warn">Till is short overall by ${centsToDollars(-diffTotal)}.</p>
     `;
   } else {
     summaryBox.innerHTML += `
-      <p class="good">Takings: ${centsToDollars(totalActual - totalTarget)}.</p>
+      <p class="good">Takings (what you will bank): ${centsToDollars(diffTotal)}.</p>
     `;
   }
 
-  summaryBox.innerHTML += `<p style="font-size:0.8rem; color:#555;">After you follow the steps, re-count the float and press "Show my steps" again to check every row says “Perfect!”.</p>`;
+  summaryBox.innerHTML += `
+    <p style="font-size:0.8rem; color:#555;">
+      After you follow the steps, re-count the float and press "Show my steps" again to check every row says “Perfect!”.
+    </p>
+  `;
 });
+
+//------------------------------------------
+// TAKINGS DOUBLE-CHECK
+// (User types how many of each denom went to takings)
+//------------------------------------------
+const checkBtn = document.getElementById("checkTakingsBtn");
+if (checkBtn) {
+  checkBtn.addEventListener("click", () => {
+    let countedTakingsCents = 0;
+
+    DENOMS.forEach(d => {
+      const input = document.getElementById(`check_takings_${d.key}`);
+      const val = input ? parseInt(input.value) || 0 : 0;
+      countedTakingsCents += val * d.value;
+    });
+
+    const resultBox = document.getElementById("takingsCheckResult");
+    if (!resultBox) return;
+
+    resultBox.innerHTML = `
+      <p><strong>Your counted takings:</strong> ${centsToDollars(countedTakingsCents)}</p>
+      <p><strong>Expected takings:</strong> ${centsToDollars(lastExpectedTakingsCents)}</p>
+    `;
+
+    if (countedTakingsCents === lastExpectedTakingsCents) {
+      resultBox.innerHTML += `
+        <p class="good">✅ Perfect match! Your cash-up balances.</p>
+      `;
+    } else {
+      const diff = countedTakingsCents - lastExpectedTakingsCents;
+      resultBox.innerHTML += `
+        <p class="warn">
+          ⚠️ These don't match. Difference: ${centsToDollars(diff)}.
+          Please re-check your counts and exchanges.
+        </p>
+      `;
+    }
+  });
+}
 
 // -----------------------------------------
 // FINISHED BUTTON CONFETTI + RUN ANIMATION
+// (unchanged from your version)
 // -----------------------------------------
 document.getElementById("finishedBtn").addEventListener("click", () => {
 
@@ -530,18 +443,18 @@ document.getElementById("finishedBtn").addEventListener("click", () => {
 
   // ---- RUNNER ----
   const runner = document.getElementById("runnerSprite");
-  runner.classList.remove("run-slide"); // reset if clicked twice
-  void runner.offsetWidth; // force reflow
-  runner.classList.add("run-slide");
+  if (runner) {
+    runner.classList.remove("run-slide"); // reset if clicked twice
+    void runner.offsetWidth; // force reflow
+    runner.classList.add("run-slide");
+  }
 
   // ---- SUCCESS MESSAGE ----
   const msg = document.getElementById("successMessage");
-  msg.classList.add("show");
-
-  // hide it after 3 seconds
-  setTimeout(() => {
-    msg.classList.remove("show");
-  }, 3000);
+  if (msg) {
+    msg.classList.add("show");
+    setTimeout(() => msg.classList.remove("show"), 3000);
+  }
 });
 
 // -----------------------------------------
