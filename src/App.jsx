@@ -1,17 +1,22 @@
 import { useState } from "react";
 import "./App.css";
-import DenominationRow from "./components/DenominationRow";
+
 import ComparisonSection from "./components/ComparisonSection";
+import DenominationRow from "./components/DenominationRow";
+import MoneyMoveList from "./components/MoneyMoveList";
+import QuantityList from "./components/QuantityList";
+
 import { denominations } from "./data/denominations";
+
 import {
+  calculateChangeBagPlan,
   calculateExpectedTakings,
+  calculateExtrasTotal,
   calculateTargetFloatTotal,
   calculateTillTotal,
   compareWithTarget,
   formatCurrency,
-  calculateExtrasTotal,
 } from "./utils/cashCalculations";
-import MoneyMoveList from "./components/MoneyMoveList";
 
 function App() {
   const initialCounts = Object.fromEntries(
@@ -32,6 +37,10 @@ function App() {
   const correct = comparison.filter((item) => item.status === "correct");
 
   const extrasTotal = calculateExtrasTotal(comparison);
+  const changeBagPlan = calculateChangeBagPlan(comparison);
+
+  const totalsBalance =
+    targetFloatTotal + expectedTakings === tillTotal;
 
   const updateCount = (denominationId, newCount) => {
     setCounts((currentCounts) => ({
@@ -40,83 +49,342 @@ function App() {
     }));
   };
 
+  /*
+   * STEP 5: FINAL CHECK
+   */
+  if (currentStep === "final-check") {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Step 5 of 5</p>
+          <h1>Final Check</h1>
+
+          <p className="app-subtitle">
+            Check that the final amounts match your cash-up.
+          </p>
+        </header>
+
+        <main className="app-content">
+          <section className="summary-grid">
+            <div className="summary-card">
+              <span>Float</span>
+              <strong>{formatCurrency(targetFloatTotal)}</strong>
+            </div>
+
+            <div className="summary-card">
+              <span>Takings</span>
+              <strong>{formatCurrency(expectedTakings)}</strong>
+            </div>
+
+            <div className="summary-card">
+              <span>Original till</span>
+              <strong>{formatCurrency(tillTotal)}</strong>
+            </div>
+          </section>
+
+          {totalsBalance ? (
+            <section className="instruction-card" aria-live="polite">
+              <h2>Everything balances</h2>
+
+              <p>
+                The Float and Takings add up to the original amount in
+                the till.
+              </p>
+            </section>
+          ) : (
+            <section className="warning-card" aria-live="assertive">
+              <h2>The totals do not balance</h2>
+
+              <p>
+                Go back and review the count and Change Bag
+                instructions before finishing.
+              </p>
+            </section>
+          )}
+
+          <button
+            type="button"
+            className="primary-button"
+            disabled={!totalsBalance}
+          >
+            Finish cash-up
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setCurrentStep("change-bag")}
+          >
+            Back to Change Bag
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  /*
+   * STEP 4: CHANGE BAG
+   */
+  if (currentStep === "change-bag") {
+    /*
+     * No exchange is required.
+     */
+    if (!changeBagPlan.required) {
+      return (
+        <div className="app-shell">
+          <header className="app-header">
+            <p className="app-eyebrow">Step 4 of 5</p>
+            <h1>No Change Bag Needed</h1>
+
+            <p className="app-subtitle">
+              Your float already has the correct denominations.
+            </p>
+          </header>
+
+          <main className="app-content">
+            <section className="instruction-card">
+              <h2>Good news</h2>
+
+              <p>
+                You do not need to exchange any money through the
+                Change Bag.
+              </p>
+            </section>
+
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => setCurrentStep("final-check")}
+            >
+              Continue to final check
+            </button>
+
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setCurrentStep("move-extras")}
+            >
+              Back
+            </button>
+          </main>
+        </div>
+      );
+    }
+
+    /*
+     * The exchange cannot be completed using the current extras.
+     */
+    if (!changeBagPlan.possible) {
+      return (
+        <div className="app-shell">
+          <header className="app-header">
+            <p className="app-eyebrow">Step 4 of 5</p>
+            <h1>Change Bag Help Needed</h1>
+
+            <p className="app-subtitle">
+              The current Takings cannot cover all float shortages.
+            </p>
+          </header>
+
+          <main className="app-content">
+            <section className="warning-card">
+              <h2>Unable to complete automatically</h2>
+              <p>{changeBagPlan.reason}</p>
+            </section>
+
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setCurrentStep("review")}
+            >
+              Back to review
+            </button>
+          </main>
+        </div>
+      );
+    }
+
+    /*
+     * Standard Change Bag instructions.
+     */
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Step 4 of 5</p>
+          <h1>Use the Change Bag</h1>
+
+          <p className="app-subtitle">
+            Follow each action in order. The app has done the maths
+            for you.
+          </p>
+        </header>
+
+        <main className="app-content">
+          <section className="change-step-card">
+            <span className="change-step-number">1</span>
+
+            <div>
+              <h2>Put into Change Bag</h2>
+
+              <QuantityList
+                items={changeBagPlan.depositItems}
+              />
+            </div>
+          </section>
+
+          <section className="change-step-card">
+            <span className="change-step-number">2</span>
+
+            <div>
+              <h2>Take out of Change Bag</h2>
+
+              <QuantityList
+                items={changeBagPlan.withdrawalItems}
+              />
+            </div>
+          </section>
+
+          <section className="destination-grid">
+            <section className="destination-card">
+              <p className="destination-label">Put into</p>
+              <h2>Float</h2>
+
+              <QuantityList
+                items={changeBagPlan.shortageItems}
+              />
+            </section>
+
+            <section className="destination-card">
+              <p className="destination-label">Put into</p>
+              <h2>Takings</h2>
+
+              <QuantityList
+                items={changeBagPlan.remainderItems}
+              />
+            </section>
+          </section>
+
+          <section className="instruction-card">
+            <h2>Check before continuing</h2>
+
+            <p>
+              Make sure the Float and Takings now contain exactly the
+              amounts shown above.
+            </p>
+          </section>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => setCurrentStep("final-check")}
+          >
+            I’ve completed the change
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setCurrentStep("move-extras")}
+          >
+            Back
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  /*
+   * STEP 3: MOVE EXTRAS TO TAKINGS
+   */
   if (currentStep === "move-extras") {
-  return (
-    <div className="app-shell">
-      <header className="app-header">
-        <p className="app-eyebrow">Step 3 of 5</p>
-        <h1>Move Extras to Takings</h1>
-        <p className="app-subtitle">
-          Remove the extra notes and coins from the till.
-        </p>
-      </header>
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Step 3 of 5</p>
+          <h1>Move Extras to Takings</h1>
 
-      <main className="app-content">
-        <section className="move-instruction-card">
-          <p className="move-instruction-label">Take out:</p>
-
-          <MoneyMoveList items={extras} />
-
-          <p className="move-destination">
-            Put this money into <strong>Takings</strong>.
+          <p className="app-subtitle">
+            Remove the extra notes and coins from the till.
           </p>
-        </section>
+        </header>
 
-        <section className="money-direction-card">
-          <div className="money-location">
-            <span className="money-location-label">From</span>
-            <strong>Till</strong>
-          </div>
+        <main className="app-content">
+          <section className="move-instruction-card">
+            <p className="move-instruction-label">Take out:</p>
 
-          <span className="money-direction-arrow" aria-hidden="true">
-            →
-          </span>
+            <MoneyMoveList items={extras} />
 
-          <div className="money-location">
-            <span className="money-location-label">To</span>
-            <strong>Takings</strong>
-          </div>
-        </section>
+            <p className="move-destination">
+              Put this money into <strong>Takings</strong>.
+            </p>
+          </section>
 
-        <section className="takings-progress-card" aria-live="polite">
-          <span>Takings so far</span>
-          <strong>{formatCurrency(extrasTotal)}</strong>
-        </section>
+          <section className="money-direction-card">
+            <div className="money-location">
+              <span className="money-location-label">From</span>
+              <strong>Till</strong>
+            </div>
 
-        <section className="instruction-card">
-          <h2>Before continuing</h2>
-          <p>
-            Make sure all the listed extras have been physically removed from
-            the till and placed into Takings.
-          </p>
-        </section>
+            <span
+              className="money-direction-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
 
-        <button
-          type="button"
-          className="primary-button"
-          onClick={() => setCurrentStep("change-bag")}
-        >
-          I’ve moved the extras
-        </button>
+            <div className="money-location">
+              <span className="money-location-label">To</span>
+              <strong>Takings</strong>
+            </div>
+          </section>
 
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => setCurrentStep("review")}
-        >
-          Back to review
-        </button>
-      </main>
-    </div>
-  );
-}
+          <section
+            className="takings-progress-card"
+            aria-live="polite"
+          >
+            <span>Takings so far</span>
+            <strong>{formatCurrency(extrasTotal)}</strong>
+          </section>
 
+          <section className="instruction-card">
+            <h2>Before continuing</h2>
+
+            <p>
+              Make sure all the listed extras have been physically
+              removed from the till and placed into Takings.
+            </p>
+          </section>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => setCurrentStep("change-bag")}
+          >
+            I’ve moved the extras
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setCurrentStep("review")}
+          >
+            Back to review
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  /*
+   * STEP 2: REVIEW EXTRAS AND SHORTAGES
+   */
   if (currentStep === "review") {
     return (
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Step 2 of 5</p>
           <h1>Extras and Shortages</h1>
+
           <p className="app-subtitle">
             We compared your till with the target float.
           </p>
@@ -162,12 +430,12 @@ function App() {
           />
 
           <button
-  type="button"
-  className="primary-button"
-  onClick={() => setCurrentStep("move-extras")}
->
-  Next: Move Extras to Takings
-</button>
+            type="button"
+            className="primary-button"
+            onClick={() => setCurrentStep("move-extras")}
+          >
+            Next: Move Extras to Takings
+          </button>
 
           <button
             type="button"
@@ -181,11 +449,15 @@ function App() {
     );
   }
 
+  /*
+   * STEP 1: COUNT THE TILL
+   */
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">Step 1 of 5</p>
         <h1>Count the Till</h1>
+
         <p className="app-subtitle">
           Count everything currently in the till.
         </p>
@@ -194,8 +466,10 @@ function App() {
       <main className="app-content">
         <section className="instruction-card">
           <h2>Enter each denomination</h2>
+
           <p>
-            Use the buttons or type the number of notes and coins you have.
+            Use the buttons or type the number of notes and coins you
+            have.
           </p>
         </section>
 
