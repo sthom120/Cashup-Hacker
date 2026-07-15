@@ -15,3 +15,46 @@ export function calculateTargetFloatTotal() {
     return total + targetCount * denomination.valueInCents;
   }, 0);
 }
+
+export function calculateTillTotal(counts) {
+  return denominations.reduce((total, denomination) => {
+    const count = counts[denomination.id] ?? 0;
+
+    return total + count * denomination.valueInCents;
+  }, 0);
+}
+
+export function compareWithTarget(counts) {
+  return denominations.map((denomination) => {
+    const counted = counts[denomination.id] ?? 0;
+    const target = floatTargets[denomination.id] ?? 0;
+    const difference = counted - target;
+
+    let status = "correct";
+
+    if (difference > 0) {
+      status = "extra";
+    }
+
+    if (difference < 0) {
+      status = "short";
+    }
+
+    return {
+      ...denomination,
+      counted,
+      target,
+      difference,
+      status,
+      differenceValueInCents:
+        Math.abs(difference) * denomination.valueInCents,
+    };
+  });
+}
+
+export function calculateExpectedTakings(counts) {
+  const tillTotal = calculateTillTotal(counts);
+  const targetFloatTotal = calculateTargetFloatTotal();
+
+  return tillTotal - targetFloatTotal;
+}

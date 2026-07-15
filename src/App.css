@@ -272,3 +272,93 @@ button {
     flex: 1;
   }
 }
+
+.summary-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 1rem;
+}
+
+.summary-card span {
+  color: #59636e;
+  font-weight: 600;
+}
+
+.summary-card strong {
+  font-size: 1.3rem;
+}
+
+.comparison-section {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 1rem;
+}
+
+.comparison-heading h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+}
+
+.comparison-heading p {
+  margin: 0;
+  color: #59636e;
+  line-height: 1.5;
+}
+
+.comparison-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comparison-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem;
+  background: #f5f6f8;
+  border-radius: 0.75rem;
+}
+
+.comparison-item strong,
+.comparison-item span {
+  display: block;
+}
+
+.comparison-item span {
+  color: #59636e;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.empty-message {
+  margin: 1rem 0 0;
+  color: #59636e;
+}
+
+@media (min-width: 650px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .summary-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
