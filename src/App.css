@@ -1,184 +1,157 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+#root {
+  min-height: 100vh;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+* {
+  box-sizing: border-box;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f5f6f8;
+  color: #20242a;
+  font-family:
+    Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+button,
+input {
+  font: inherit;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+button {
+  cursor: pointer;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+.app-shell {
+  min-height: 100vh;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.app-header {
+  padding: 2rem 1.25rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe3e8;
 }
 
-.ticks {
-  position: relative;
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 8vw, 3rem);
+  line-height: 1;
+}
+
+.app-eyebrow {
+  margin: 0 0 0.5rem;
+  color: #59636e;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-subtitle {
+  max-width: 34rem;
+  margin: 0.9rem 0 0;
+  color: #59636e;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.app-content {
+  width: min(100% - 2rem, 40rem);
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+}
+
+.welcome-card,
+.target-card {
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 1rem;
+  box-shadow: 0 0.35rem 1rem rgb(0 0 0 / 7%);
+}
+
+.welcome-card {
+  padding: 1.5rem;
+}
+
+.welcome-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+}
+
+.welcome-card p {
+  margin: 0 0 1.5rem;
+  color: #59636e;
+  line-height: 1.55;
+}
+
+.primary-button,
+.secondary-button {
   width: 100%;
+  min-height: 3.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.8rem;
+  font-weight: 700;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+.primary-button {
+  border: 2px solid #20242a;
+  background: #20242a;
+  color: #ffffff;
+}
+
+.secondary-button {
+  margin-top: 0.75rem;
+  border: 2px solid #20242a;
+  background: #ffffff;
+  color: #20242a;
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+  background: #3a4149;
+}
+
+.secondary-button:hover,
+.secondary-button:focus-visible {
+  background: #eef0f2;
+}
+
+.primary-button:focus-visible,
+.secondary-button:focus-visible {
+  outline: 3px solid #6d7b8a;
+  outline-offset: 3px;
+}
+
+.target-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.target-card span {
+  color: #59636e;
+  font-weight: 600;
+}
+
+.target-card strong {
+  font-size: 1.35rem;
+}
+
+@media (min-width: 700px) {
+  .app-header {
+    padding: 3rem 2rem 2rem;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .app-content {
+    padding-top: 2rem;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  .welcome-card {
+    padding: 2rem;
   }
 }
