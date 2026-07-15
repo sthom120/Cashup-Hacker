@@ -9,7 +9,9 @@ import {
   calculateTillTotal,
   compareWithTarget,
   formatCurrency,
+  calculateExtrasTotal,
 } from "./utils/cashCalculations";
+import MoneyMoveList from "./components/MoneyMoveList";
 
 function App() {
   const initialCounts = Object.fromEntries(
@@ -29,12 +31,85 @@ function App() {
   const shortages = comparison.filter((item) => item.status === "short");
   const correct = comparison.filter((item) => item.status === "correct");
 
+  const extrasTotal = calculateExtrasTotal(comparison);
+
   const updateCount = (denominationId, newCount) => {
     setCounts((currentCounts) => ({
       ...currentCounts,
       [denominationId]: newCount,
     }));
   };
+
+  if (currentStep === "move-extras") {
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <p className="app-eyebrow">Step 3 of 5</p>
+        <h1>Move Extras to Takings</h1>
+        <p className="app-subtitle">
+          Remove the extra notes and coins from the till.
+        </p>
+      </header>
+
+      <main className="app-content">
+        <section className="move-instruction-card">
+          <p className="move-instruction-label">Take out:</p>
+
+          <MoneyMoveList items={extras} />
+
+          <p className="move-destination">
+            Put this money into <strong>Takings</strong>.
+          </p>
+        </section>
+
+        <section className="money-direction-card">
+          <div className="money-location">
+            <span className="money-location-label">From</span>
+            <strong>Till</strong>
+          </div>
+
+          <span className="money-direction-arrow" aria-hidden="true">
+            →
+          </span>
+
+          <div className="money-location">
+            <span className="money-location-label">To</span>
+            <strong>Takings</strong>
+          </div>
+        </section>
+
+        <section className="takings-progress-card" aria-live="polite">
+          <span>Takings so far</span>
+          <strong>{formatCurrency(extrasTotal)}</strong>
+        </section>
+
+        <section className="instruction-card">
+          <h2>Before continuing</h2>
+          <p>
+            Make sure all the listed extras have been physically removed from
+            the till and placed into Takings.
+          </p>
+        </section>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setCurrentStep("change-bag")}
+        >
+          I’ve moved the extras
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setCurrentStep("review")}
+        >
+          Back to review
+        </button>
+      </main>
+    </div>
+  );
+}
 
   if (currentStep === "review") {
     return (
@@ -86,9 +161,13 @@ function App() {
             emptyMessage="No denominations match the target yet."
           />
 
-          <button type="button" className="primary-button">
-            Next: Move Extras to Takings
-          </button>
+          <button
+  type="button"
+  className="primary-button"
+  onClick={() => setCurrentStep("move-extras")}
+>
+  Next: Move Extras to Takings
+</button>
 
           <button
             type="button"

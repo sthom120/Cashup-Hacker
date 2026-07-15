@@ -362,3 +362,101 @@ button {
     flex-direction: column;
   }
 }
+
+.move-instruction-card,
+.money-direction-card,
+.takings-progress-card {
+  margin-bottom: 1rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 1rem;
+}
+
+.move-instruction-card {
+  padding: 1.5rem;
+}
+
+.move-instruction-label {
+  margin: 0 0 0.75rem;
+  color: #59636e;
+  font-weight: 700;
+}
+
+.money-move-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.money-move-item {
+  padding: 1rem;
+  background: #f5f6f8;
+  border-radius: 0.75rem;
+  font-size: 1.2rem;
+}
+
+.move-destination {
+  margin: 1.25rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid #dfe3e8;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.money-direction-card {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.money-location {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: #f5f6f8;
+  border-radius: 0.75rem;
+}
+
+.money-location-label {
+  color: #59636e;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.money-direction-arrow {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.takings-progress-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.takings-progress-card span {
+  color: #59636e;
+  font-weight: 600;
+}
+
+.takings-progress-card strong {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 420px) {
+  .money-direction-card {
+    grid-template-columns: 1fr;
+  }
+
+  .money-direction-arrow {
+    transform: rotate(90deg);
+  }
+}

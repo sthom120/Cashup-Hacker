@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   calculateExpectedTakings,
+  calculateExtrasTotal,
   calculateTargetFloatTotal,
   calculateTillTotal,
   compareWithTarget,
@@ -98,4 +99,10 @@ describe("cash calculations", () => {
   it("handles missing counts as zero", () => {
     expect(calculateTillTotal({})).toBe(0);
   });
+});
+
+it("calculates the example extras as $200", () => {
+  const comparison = compareWithTarget(exampleCounts);
+
+  expect(calculateExtrasTotal(comparison)).toBe(20000);
 });

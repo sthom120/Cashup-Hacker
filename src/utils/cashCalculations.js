@@ -58,3 +58,11 @@ export function calculateExpectedTakings(counts) {
 
   return tillTotal - targetFloatTotal;
 }
+
+export function calculateExtrasTotal(comparison) {
+  return comparison
+    .filter((item) => item.status === "extra")
+    .reduce((total, item) => {
+      return total + item.difference * item.valueInCents;
+    }, 0);
+}
