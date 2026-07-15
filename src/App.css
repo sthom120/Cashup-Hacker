@@ -155,3 +155,120 @@ button {
     padding: 2rem;
   }
 }
+
+.instruction-card {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 1rem;
+}
+
+.instruction-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.instruction-card p {
+  margin: 0;
+  color: #59636e;
+  line-height: 1.5;
+}
+
+.denomination-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.denomination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 0.9rem;
+}
+
+.denomination-label,
+.denomination-subtotal {
+  display: block;
+}
+
+.denomination-label {
+  font-size: 1.2rem;
+}
+
+.denomination-subtotal {
+  margin-top: 0.25rem;
+  color: #59636e;
+  font-size: 0.9rem;
+}
+
+.count-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid #20242a;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #20242a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.count-input {
+  width: 4rem;
+  height: 2.75rem;
+  border: 2px solid #b7bec7;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.count-input:focus-visible,
+.count-button:focus-visible {
+  outline: 3px solid #6d7b8a;
+  outline-offset: 3px;
+}
+
+.total-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1.25rem 1.5rem;
+  background: #20242a;
+  color: #ffffff;
+  border-radius: 1rem;
+}
+
+.total-card span {
+  font-weight: 600;
+}
+
+.total-card strong {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 420px) {
+  .denomination-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .count-controls {
+    width: 100%;
+  }
+
+  .count-input {
+    flex: 1;
+  }
+}

@@ -1,40 +1,79 @@
+import { useState } from "react";
 import "./App.css";
+import DenominationRow from "./components/DenominationRow";
+import { denominations } from "./data/denominations";
 import {
   calculateTargetFloatTotal,
   formatCurrency,
 } from "./utils/cashCalculations";
 
 function App() {
+  const initialCounts = Object.fromEntries(
+    denominations.map((denomination) => [denomination.id, 0]),
+  );
+
+  const [counts, setCounts] = useState(initialCounts);
+
   const targetFloatTotal = calculateTargetFloatTotal();
+
+  const tillTotal = denominations.reduce((total, denomination) => {
+    const count = counts[denomination.id] ?? 0;
+
+    return total + count * denomination.valueInCents;
+  }, 0);
+
+  const updateCount = (denominationId, newCount) => {
+    setCounts((currentCounts) => ({
+      ...currentCounts,
+      [denominationId]: newCount,
+    }));
+  };
+
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="app-eyebrow">Cash-up assistant</p>
-        <h1>Cash-up Hacker</h1>
+        <p className="app-eyebrow">Step 1 of 5</p>
+        <h1>Count the Till</h1>
         <p className="app-subtitle">
-          Rebuild your float with clear, step-by-step instructions.
+          Count everything currently in the till.
         </p>
       </header>
 
       <main className="app-content">
-        <section className="welcome-card">
-          <h2>Ready to start?</h2>
+        <section className="instruction-card">
+          <h2>Enter each denomination</h2>
           <p>
-            Count what is currently in the till, and we’ll show you exactly
-            what to move.
+            Use the buttons or type the number of notes and coins you have.
           </p>
-
-          <button type="button" className="primary-button">
-            Start cash-up
-          </button>
-
-          <button type="button" className="secondary-button">
-            How it works
-          </button>
         </section>
 
+        <section
+          className="denomination-list"
+          aria-label="Till denomination counts"
+        >
+          {denominations.map((denomination) => (
+            <DenominationRow
+              key={denomination.id}
+              denomination={denomination}
+              count={counts[denomination.id]}
+              onCountChange={(newCount) =>
+                updateCount(denomination.id, newCount)
+              }
+            />
+          ))}
+        </section>
+
+        <section className="total-card" aria-live="polite">
+          <span>Total in till</span>
+          <strong>{formatCurrency(tillTotal)}</strong>
+        </section>
+
+        <button type="button" className="primary-button">
+          Review my cash-up
+        </button>
+
         <section className="target-card">
-          <span>Current float target</span>
+          <span>Target float</span>
           <strong>{formatCurrency(targetFloatTotal)}</strong>
         </section>
       </main>
