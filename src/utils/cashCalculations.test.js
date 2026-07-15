@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  breakAmountIntoDenominations,
+  calculateChangeBagPlan,
   calculateExpectedTakings,
   calculateExtrasTotal,
+  calculateShortagesTotal,
   calculateTargetFloatTotal,
   calculateTillTotal,
   compareWithTarget,
@@ -99,10 +102,141 @@ describe("cash calculations", () => {
   it("handles missing counts as zero", () => {
     expect(calculateTillTotal({})).toBe(0);
   });
-});
 
-it("calculates the example extras as $200", () => {
-  const comparison = compareWithTarget(exampleCounts);
+  it("calculates the example extras as $200", () => {
+    const comparison = compareWithTarget(exampleCounts);
 
-  expect(calculateExtrasTotal(comparison)).toBe(20000);
+    expect(calculateExtrasTotal(comparison)).toBe(20000);
+  });
+
+  it("calculates the shortages as $62.15", () => {
+    const comparison = compareWithTarget(exampleCounts);
+
+    expect(calculateShortagesTotal(comparison)).toBe(6215);
+  });
+
+  it("breaks $37.85 into Australian denominations", () => {
+    expect(breakAmountIntoDenominations(3785)).toEqual([
+      {
+        id: "20-dollar",
+        label: "$20",
+        valueInCents: 2000,
+        quantity: 1,
+      },
+      {
+        id: "10-dollar",
+        label: "$10",
+        valueInCents: 1000,
+        quantity: 1,
+      },
+      {
+        id: "5-dollar",
+        label: "$5",
+        valueInCents: 500,
+        quantity: 1,
+      },
+      {
+        id: "2-dollar",
+        label: "$2",
+        valueInCents: 200,
+        quantity: 1,
+      },
+      {
+        id: "50-cent",
+        label: "50c",
+        valueInCents: 50,
+        quantity: 1,
+      },
+      {
+        id: "20-cent",
+        label: "20c",
+        valueInCents: 20,
+        quantity: 1,
+      },
+      {
+        id: "10-cent",
+        label: "10c",
+        valueInCents: 10,
+        quantity: 1,
+      },
+      {
+        id: "5-cent",
+        label: "5c",
+        valueInCents: 5,
+        quantity: 1,
+      },
+    ]);
+  });
+
+  it("creates the correct Change Bag deposit for the example", () => {
+    const comparison = compareWithTarget(exampleCounts);
+    const plan = calculateChangeBagPlan(comparison);
+
+    expect(plan.possible).toBe(true);
+    expect(plan.depositTotalInCents).toBe(10000);
+
+    expect(plan.depositItems).toEqual([
+      {
+        id: "50-dollar",
+        label: "$50",
+        valueInCents: 5000,
+        quantity: 2,
+      },
+    ]);
+  });
+
+  it("creates the correct items to put into the Float", () => {
+    const comparison = compareWithTarget(exampleCounts);
+    const plan = calculateChangeBagPlan(comparison);
+
+    expect(plan.shortageItems).toEqual([
+      expect.objectContaining({
+        id: "20-dollar",
+        quantity: 3,
+      }),
+      expect.objectContaining({
+        id: "2-dollar",
+        quantity: 1,
+      }),
+      expect.objectContaining({
+        id: "5-cent",
+        quantity: 3,
+      }),
+    ]);
+  });
+
+  it("calculates $37.85 remaining for Takings", () => {
+    const comparison = compareWithTarget(exampleCounts);
+    const plan = calculateChangeBagPlan(comparison);
+
+    expect(plan.remainderTotalInCents).toBe(3785);
+  });
+
+  it("creates the complete Change Bag withdrawal list", () => {
+    const comparison = compareWithTarget(exampleCounts);
+    const plan = calculateChangeBagPlan(comparison);
+
+    expect(
+      plan.withdrawalItems.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+      })),
+    ).toEqual([
+      { id: "20-dollar", quantity: 4 },
+      { id: "10-dollar", quantity: 1 },
+      { id: "5-dollar", quantity: 1 },
+      { id: "2-dollar", quantity: 2 },
+      { id: "50-cent", quantity: 1 },
+      { id: "20-cent", quantity: 1 },
+      { id: "10-cent", quantity: 1 },
+      { id: "5-cent", quantity: 4 },
+    ]);
+  });
+
+  it("does not require the Change Bag for an exact float", () => {
+    const comparison = compareWithTarget(exactTargetCounts);
+    const plan = calculateChangeBagPlan(comparison);
+
+    expect(plan.required).toBe(false);
+  });
 });
