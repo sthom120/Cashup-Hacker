@@ -80,6 +80,12 @@ function App() {
 
   const totalsBalance = targetFloatTotal + expectedTakings === tillTotal;
 
+  const tillIsEmpty = tillTotal === 0;
+
+  const tillIsBelowTarget = tillTotal < targetFloatTotal;
+
+  const canReviewCashUp = !tillIsEmpty && !tillIsBelowTarget;
+
   useEffect(() => {
     const cashUpSteps = [
       "count",
@@ -223,6 +229,51 @@ function App() {
             onClick={discardSavedCashUp}
           >
             Start over
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  if (
+    currentStep !== "count" &&
+    currentStep !== "settings" &&
+    currentStep !== "help" &&
+    currentStep !== "complete" &&
+    tillIsBelowTarget
+  ) {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Cash-up issue</p>
+          <h1>Check the Till Count</h1>
+
+          <p className="app-subtitle">
+            The current amount cannot produce a complete Float.
+          </p>
+        </header>
+
+        <main className="app-content">
+          <section className="warning-card" aria-live="assertive">
+            <h2>The till is short overall</h2>
+
+            <p>
+              The till contains {formatCurrency(tillTotal)}, but the target
+              Float is {formatCurrency(targetFloatTotal)}.
+            </p>
+
+            <p>
+              Return to the count and check whether any notes or coins were
+              missed.
+            </p>
+          </section>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => setCurrentStep("count")}
+          >
+            Return to Till count
           </button>
         </main>
       </div>
@@ -709,9 +760,7 @@ function App() {
 
           <div className="section-heading">
             <h2>Where the money goes</h2>
-            <p>
-              Separate the withdrawn change between Float and Takings.
-            </p>
+            <p>Separate the withdrawn change between Float and Takings.</p>
           </div>
 
           <section className="destination-grid">
@@ -959,9 +1008,36 @@ function App() {
           <strong>{formatCurrency(tillTotal)}</strong>
         </section>
 
+        {tillIsEmpty && (
+          <section className="validation-card" aria-live="polite">
+            <h2>No money entered yet</h2>
+
+            <p>
+              Enter the notes and coins currently in the till before continuing.
+            </p>
+          </section>
+        )}
+
+        {tillIsBelowTarget && !tillIsEmpty && (
+          <section className="warning-card" aria-live="assertive">
+            <h2>The till is below the target Float</h2>
+
+            <p>
+              The till contains {formatCurrency(tillTotal)}, but the target
+              Float is {formatCurrency(targetFloatTotal)}.
+            </p>
+
+            <p>
+              Check the count before continuing. The app cannot calculate
+              positive Takings from this amount.
+            </p>
+          </section>
+        )}
+
         <button
           type="button"
           className="primary-button"
+          disabled={!canReviewCashUp}
           onClick={() => setCurrentStep("review")}
         >
           Review my cash-up
