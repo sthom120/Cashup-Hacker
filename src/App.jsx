@@ -5,8 +5,10 @@ import ComparisonSection from "./components/ComparisonSection";
 import DenominationRow from "./components/DenominationRow";
 import MoneyMoveList from "./components/MoneyMoveList";
 import QuantityList from "./components/QuantityList";
+import FloatTargetRow from "./components/FloatTargetRow";
 
 import { denominations } from "./data/denominations";
+import { defaultFloatTargets } from "./data/floatTargets";
 
 import {
   calculateChangeBagPlan,
@@ -18,19 +20,28 @@ import {
   formatCurrency,
 } from "./utils/cashCalculations";
 
+import {
+  clearSavedFloatTargets,
+  loadFloatTargets,
+  saveFloatTargets,
+} from "./utils/floatTargetStorage";
+
 function App() {
   const initialCounts = Object.fromEntries(
     denominations.map((denomination) => [denomination.id, 0]),
   );
 
   const [counts, setCounts] = useState(initialCounts);
+  const [floatTargets, setFloatTargets] = useState(() => loadFloatTargets());
   const [currentStep, setCurrentStep] = useState("count");
+  const [completedAt, setCompletedAt] = useState(null);
 
   const tillTotal = calculateTillTotal(counts);
-  const targetFloatTotal = calculateTargetFloatTotal();
-  const expectedTakings = calculateExpectedTakings(counts);
+  const targetFloatTotal = calculateTargetFloatTotal(floatTargets);
 
-  const comparison = compareWithTarget(counts);
+  const expectedTakings = calculateExpectedTakings(counts, floatTargets);
+
+  const comparison = compareWithTarget(counts, floatTargets);
 
   const extras = comparison.filter((item) => item.status === "extra");
   const shortages = comparison.filter((item) => item.status === "short");
@@ -39,8 +50,7 @@ function App() {
   const extrasTotal = calculateExtrasTotal(comparison);
   const changeBagPlan = calculateChangeBagPlan(comparison);
 
-  const totalsBalance =
-    targetFloatTotal + expectedTakings === tillTotal;
+  const totalsBalance = targetFloatTotal + expectedTakings === tillTotal;
 
   const updateCount = (denominationId, newCount) => {
     setCounts((currentCounts) => ({
@@ -49,6 +59,185 @@ function App() {
     }));
   };
 
+  const finishCashUp = () => {
+    if (!totalsBalance) {
+      return;
+    }
+
+    setCompletedAt(new Date());
+    setCurrentStep("complete");
+  };
+
+  const startNewCashUp = () => {
+    setCounts(initialCounts);
+    setCompletedAt(null);
+    setCurrentStep("count");
+  };
+
+  const updateFloatTarget = (denominationId, newTarget) => {
+    setFloatTargets((currentTargets) => ({
+      ...currentTargets,
+      [denominationId]: newTarget,
+    }));
+  };
+
+  const saveTargetSettings = () => {
+    saveFloatTargets(floatTargets);
+    setCurrentStep("count");
+  };
+
+  const resetTargetSettings = () => {
+    clearSavedFloatTargets();
+    setFloatTargets({ ...defaultFloatTargets });
+  };
+
+  /*
+   * COMPLETION SCREEN
+   */
+  if (currentStep === "complete") {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Cash-up complete</p>
+          <h1>All done</h1>
+
+          <p className="app-subtitle">
+            Your Float is ready and your Takings have been calculated.
+          </p>
+        </header>
+
+        <main className="app-content">
+          <section className="completion-card" aria-live="polite">
+            <div className="completion-icon" aria-hidden="true">
+              ✓
+            </div>
+
+            <h2>Everything balances</h2>
+
+            <p>
+              The full amount from the original till has been accounted for.
+            </p>
+          </section>
+
+          <section className="summary-grid">
+            <div className="summary-card">
+              <span>Float</span>
+              <strong>{formatCurrency(targetFloatTotal)}</strong>
+            </div>
+
+            <div className="summary-card">
+              <span>Takings</span>
+              <strong>{formatCurrency(expectedTakings)}</strong>
+            </div>
+
+            <div className="summary-card">
+              <span>Original till</span>
+              <strong>{formatCurrency(tillTotal)}</strong>
+            </div>
+          </section>
+
+          {completedAt && (
+            <section className="completion-details">
+              <span>Completed</span>
+
+              <strong>
+                {completedAt.toLocaleString("en-AU", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </strong>
+            </section>
+          )}
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={startNewCashUp}
+          >
+            Start new cash-up
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setCurrentStep("final-check")}
+          >
+            Back to final summary
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  if (currentStep === "settings") {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Settings</p>
+          <h1>Float Targets</h1>
+
+          <p className="app-subtitle">
+            Set how many of each denomination should remain in the Float.
+          </p>
+        </header>
+
+        <main className="app-content">
+          <section className="instruction-card">
+            <h2>Current Float setup</h2>
+
+            <p>
+              These targets control every comparison and cash-up instruction.
+            </p>
+          </section>
+
+          <section
+            className="float-target-list"
+            aria-label="Float denomination targets"
+          >
+            {denominations.map((denomination) => (
+              <FloatTargetRow
+                key={denomination.id}
+                denomination={denomination}
+                targetCount={floatTargets[denomination.id] ?? 0}
+                onTargetChange={(newTarget) =>
+                  updateFloatTarget(denomination.id, newTarget)
+                }
+              />
+            ))}
+          </section>
+
+          <section className="total-card" aria-live="polite">
+            <span>Target Float total</span>
+            <strong>{formatCurrency(targetFloatTotal)}</strong>
+          </section>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={saveTargetSettings}
+          >
+            Save Float settings
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={resetTargetSettings}
+          >
+            Reset to Amazen default
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setCurrentStep("count")}
+          >
+            Cancel
+          </button>
+        </main>
+      </div>
+    );
+  }
   /*
    * STEP 5: FINAL CHECK
    */
@@ -87,8 +276,7 @@ function App() {
               <h2>Everything balances</h2>
 
               <p>
-                The Float and Takings add up to the original amount in
-                the till.
+                The Float and Takings add up to the original amount in the till.
               </p>
             </section>
           ) : (
@@ -96,8 +284,8 @@ function App() {
               <h2>The totals do not balance</h2>
 
               <p>
-                Go back and review the count and Change Bag
-                instructions before finishing.
+                Go back and review the count and Change Bag instructions before
+                finishing.
               </p>
             </section>
           )}
@@ -106,6 +294,7 @@ function App() {
             type="button"
             className="primary-button"
             disabled={!totalsBalance}
+            onClick={finishCashUp}
           >
             Finish cash-up
           </button>
@@ -126,9 +315,6 @@ function App() {
    * STEP 4: CHANGE BAG
    */
   if (currentStep === "change-bag") {
-    /*
-     * No exchange is required.
-     */
     if (!changeBagPlan.required) {
       return (
         <div className="app-shell">
@@ -146,8 +332,7 @@ function App() {
               <h2>Good news</h2>
 
               <p>
-                You do not need to exchange any money through the
-                Change Bag.
+                You do not need to exchange any money through the Change Bag.
               </p>
             </section>
 
@@ -171,9 +356,6 @@ function App() {
       );
     }
 
-    /*
-     * The exchange cannot be completed using the current extras.
-     */
     if (!changeBagPlan.possible) {
       return (
         <div className="app-shell">
@@ -204,9 +386,6 @@ function App() {
       );
     }
 
-    /*
-     * Standard Change Bag instructions.
-     */
     return (
       <div className="app-shell">
         <header className="app-header">
@@ -214,8 +393,7 @@ function App() {
           <h1>Use the Change Bag</h1>
 
           <p className="app-subtitle">
-            Follow each action in order. The app has done the maths
-            for you.
+            Follow each action in order. The app has done the maths for you.
           </p>
         </header>
 
@@ -225,10 +403,7 @@ function App() {
 
             <div>
               <h2>Put into Change Bag</h2>
-
-              <QuantityList
-                items={changeBagPlan.depositItems}
-              />
+              <QuantityList items={changeBagPlan.depositItems} />
             </div>
           </section>
 
@@ -237,10 +412,7 @@ function App() {
 
             <div>
               <h2>Take out of Change Bag</h2>
-
-              <QuantityList
-                items={changeBagPlan.withdrawalItems}
-              />
+              <QuantityList items={changeBagPlan.withdrawalItems} />
             </div>
           </section>
 
@@ -249,18 +421,14 @@ function App() {
               <p className="destination-label">Put into</p>
               <h2>Float</h2>
 
-              <QuantityList
-                items={changeBagPlan.shortageItems}
-              />
+              <QuantityList items={changeBagPlan.shortageItems} />
             </section>
 
             <section className="destination-card">
               <p className="destination-label">Put into</p>
               <h2>Takings</h2>
 
-              <QuantityList
-                items={changeBagPlan.remainderItems}
-              />
+              <QuantityList items={changeBagPlan.remainderItems} />
             </section>
           </section>
 
@@ -268,8 +436,8 @@ function App() {
             <h2>Check before continuing</h2>
 
             <p>
-              Make sure the Float and Takings now contain exactly the
-              amounts shown above.
+              Make sure the Float and Takings now contain exactly the amounts
+              shown above.
             </p>
           </section>
 
@@ -325,10 +493,7 @@ function App() {
               <strong>Till</strong>
             </div>
 
-            <span
-              className="money-direction-arrow"
-              aria-hidden="true"
-            >
+            <span className="money-direction-arrow" aria-hidden="true">
               →
             </span>
 
@@ -338,10 +503,7 @@ function App() {
             </div>
           </section>
 
-          <section
-            className="takings-progress-card"
-            aria-live="polite"
-          >
+          <section className="takings-progress-card" aria-live="polite">
             <span>Takings so far</span>
             <strong>{formatCurrency(extrasTotal)}</strong>
           </section>
@@ -350,8 +512,8 @@ function App() {
             <h2>Before continuing</h2>
 
             <p>
-              Make sure all the listed extras have been physically
-              removed from the till and placed into Takings.
+              Make sure all the listed extras have been physically removed from
+              the till and placed into Takings.
             </p>
           </section>
 
@@ -376,7 +538,7 @@ function App() {
   }
 
   /*
-   * STEP 2: REVIEW EXTRAS AND SHORTAGES
+   * STEP 2: REVIEW
    */
   if (currentStep === "review") {
     return (
@@ -458,19 +620,14 @@ function App() {
         <p className="app-eyebrow">Step 1 of 5</p>
         <h1>Count the Till</h1>
 
-        <p className="app-subtitle">
-          Count everything currently in the till.
-        </p>
+        <p className="app-subtitle">Count everything currently in the till.</p>
       </header>
 
       <main className="app-content">
         <section className="instruction-card">
           <h2>Enter each denomination</h2>
 
-          <p>
-            Use the buttons or type the number of notes and coins you
-            have.
-          </p>
+          <p>Use the buttons or type the number of notes and coins you have.</p>
         </section>
 
         <section
@@ -506,6 +663,13 @@ function App() {
           <span>Target float</span>
           <strong>{formatCurrency(targetFloatTotal)}</strong>
         </section>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setCurrentStep("settings")}
+        >
+          Float settings
+        </button>
       </main>
     </div>
   );

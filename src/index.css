@@ -7,3 +7,59 @@ html {
   min-width: 320px;
   min-height: 100%;
 }
+
+.float-target-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.float-target-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 0.9rem;
+}
+
+.float-target-value {
+  display: block;
+  margin-top: 0.25rem;
+  color: #59636e;
+  font-size: 0.85rem;
+}
+
+.float-target-input-group {
+  display: grid;
+  gap: 0.35rem;
+  color: #59636e;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.float-target-input {
+  width: 5rem;
+  min-height: 2.75rem;
+  border: 2px solid #b7bec7;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.float-target-input:focus-visible {
+  outline: 3px solid #6d7b8a;
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .float-target-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .float-target-input {
+    width: 100%;
+  }
+}

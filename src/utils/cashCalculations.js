@@ -1,5 +1,5 @@
 import { denominations } from "../data/denominations";
-import { floatTargets } from "../data/floatTargets";
+import { defaultFloatTargets } from "../data/floatTargets";
 
 export function formatCurrency(valueInCents) {
   return new Intl.NumberFormat("en-AU", {
@@ -8,9 +8,11 @@ export function formatCurrency(valueInCents) {
   }).format(valueInCents / 100);
 }
 
-export function calculateTargetFloatTotal() {
+export function calculateTargetFloatTotal(
+  targets = defaultFloatTargets,
+) {
   return denominations.reduce((total, denomination) => {
-    const targetCount = floatTargets[denomination.id] ?? 0;
+    const targetCount = targets[denomination.id] ?? 0;
 
     return total + targetCount * denomination.valueInCents;
   }, 0);
@@ -24,10 +26,13 @@ export function calculateTillTotal(counts) {
   }, 0);
 }
 
-export function compareWithTarget(counts) {
+export function compareWithTarget(
+  counts,
+  targets = defaultFloatTargets,
+) {
   return denominations.map((denomination) => {
     const counted = counts[denomination.id] ?? 0;
-    const target = floatTargets[denomination.id] ?? 0;
+    const target = targets[denomination.id] ?? 0;
     const difference = counted - target;
 
     let status = "correct";
@@ -52,9 +57,12 @@ export function compareWithTarget(counts) {
   });
 }
 
-export function calculateExpectedTakings(counts) {
+export function calculateExpectedTakings(
+  counts,
+  targets = defaultFloatTargets,
+) {
   const tillTotal = calculateTillTotal(counts);
-  const targetFloatTotal = calculateTargetFloatTotal();
+  const targetFloatTotal = calculateTargetFloatTotal(targets);
 
   return tillTotal - targetFloatTotal;
 }
