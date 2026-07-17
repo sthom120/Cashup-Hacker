@@ -540,3 +540,61 @@ button {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.help-section {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 1rem;
+}
+
+.help-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+}
+
+.help-steps {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.help-steps li {
+  padding-left: 0.35rem;
+}
+
+.help-steps strong,
+.help-steps span {
+  display: block;
+}
+
+.help-steps span {
+  margin-top: 0.25rem;
+  color: #59636e;
+  line-height: 1.5;
+}
+
+.term-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.term-card {
+  padding: 1rem;
+  background: #f5f6f8;
+  border-radius: 0.75rem;
+}
+
+.term-card dt {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.term-card dd {
+  margin: 0.35rem 0 0;
+  color: #59636e;
+  line-height: 1.5;
+}
