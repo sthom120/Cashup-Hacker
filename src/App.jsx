@@ -185,17 +185,17 @@ function App() {
     return (
       <div className="app-shell">
         <header className="app-header">
-          <p className="app-eyebrow">Unfinished cash-up</p>
-          <h1>Continue where you left off?</h1>
+          <p className="app-eyebrow">Saved cash-up found</p>
+          <h1>Ready to pick up where you left off?</h1>
 
           <p className="app-subtitle">
-            We found a cash-up that was not cleared from this device.
+            Your last cash-up was saved on this device.
           </p>
         </header>
 
         <main className="app-content">
           <section className="recovery-card">
-            <h2>Your progress is safe</h2>
+            <h2>Your progress is still here</h2>
 
             <p>
               Your till counts and current cash-up step were saved
@@ -220,7 +220,7 @@ function App() {
             className="primary-button"
             onClick={continueSavedCashUp}
           >
-            Continue cash-up
+            Continue my cash-up
           </button>
 
           <button
@@ -228,7 +228,7 @@ function App() {
             className="secondary-button"
             onClick={discardSavedCashUp}
           >
-            Start over
+            Start a fresh cash-up
           </button>
         </main>
       </div>
@@ -245,17 +245,17 @@ function App() {
     return (
       <div className="app-shell">
         <header className="app-header">
-          <p className="app-eyebrow">Cash-up issue</p>
-          <h1>Check the Till Count</h1>
+          <p className="app-eyebrow">Let’s check one thing</p>
+          <h1>Let’s check the Till count</h1>
 
           <p className="app-subtitle">
-            The current amount cannot produce a complete Float.
+            The current total is not enough to rebuild the Float yet.
           </p>
         </header>
 
         <main className="app-content">
           <section className="warning-card" aria-live="assertive">
-            <h2>The till is short overall</h2>
+            <h2>The Till total is below the Float target</h2>
 
             <p>
               The till contains {formatCurrency(tillTotal)}, but the target
@@ -273,7 +273,7 @@ function App() {
             className="primary-button"
             onClick={() => setCurrentStep("count")}
           >
-            Return to Till count
+            Back to the Till count
           </button>
         </main>
       </div>
@@ -288,7 +288,7 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Help</p>
-          <h1>How Cash-up Hacker Works</h1>
+          <h1>How Cash-up Hacker works</h1>
 
           <p className="app-subtitle">
             The app guides you through rebuilding the Float without needing to
@@ -298,23 +298,23 @@ function App() {
 
         <main className="app-content">
           <section className="help-section">
-            <h2>The cash-up process</h2>
+            <h2>Your cash-up, step by step</h2>
 
             <ol className="help-steps">
               <li>
-                <strong>Count the Till</strong>
+                <strong>Let’s count the Till</strong>
                 <span>
                   Enter how many notes and coins are currently in the till.
                 </span>
               </li>
 
               <li>
-                <strong>Review the result</strong>
+                <strong>Check the result</strong>
                 <span>The app compares your count with the target Float.</span>
               </li>
 
               <li>
-                <strong>Move Extras</strong>
+                <strong>Move the extras</strong>
                 <span>
                   Remove denominations above the target and put them into
                   Takings.
@@ -322,7 +322,7 @@ function App() {
               </li>
 
               <li>
-                <strong>Use the Change Bag</strong>
+                <strong>Now let’s rebuild the Float</strong>
                 <span>
                   Exchange some Takings for the denominations missing from the
                   Float.
@@ -330,7 +330,7 @@ function App() {
               </li>
 
               <li>
-                <strong>Complete the cash-up</strong>
+                <strong>Finish with a final check</strong>
                 <span>
                   Confirm that the Float and Takings add up to the original till
                   total.
@@ -340,7 +340,7 @@ function App() {
           </section>
 
           <section className="help-section">
-            <h2>What the terms mean</h2>
+            <h2>Helpful terms</h2>
 
             <dl className="term-list">
               <div className="term-card">
@@ -386,7 +386,7 @@ function App() {
           </section>
 
           <section className="instruction-card">
-            <h2>You do not need to calculate anything</h2>
+            <h2>We’ll handle the maths</h2>
 
             <p>
               Follow each instruction in order. The app will tell you what money
@@ -399,7 +399,7 @@ function App() {
             className="primary-button"
             onClick={() => setCurrentStep("count")}
           >
-            Return to cash-up
+            Back to my cash-up
           </button>
         </main>
       </div>
@@ -414,26 +414,26 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Settings</p>
-          <h1>Float Targets</h1>
+          <h1>Float settings</h1>
 
           <p className="app-subtitle">
-            Set how many of each denomination should remain in the Float.
+            Choose how many of each note and coin should stay in the Float.
           </p>
         </header>
 
         <main className="app-content">
           <section className="instruction-card">
-            <h2>Current Float setup</h2>
+            <h2>Your current Float setup</h2>
 
             <p>
-              These targets control every comparison and cash-up instruction.
+              These targets are used throughout the whole cash-up.
             </p>
           </section>
 
           <div className="section-heading">
-            <h2>Denomination targets</h2>
+            <h2>Notes and coin targets</h2>
             <p>
-              Set how many of each note and coin should remain in the Float.
+              Set the amount of each note and coin you want to keep in the Float.
             </p>
           </div>
 
@@ -454,7 +454,7 @@ function App() {
           </section>
 
           <section className="total-card" aria-live="polite">
-            <span>Target Float total</span>
+            <span>Float target total</span>
             <strong>{formatCurrency(targetFloatTotal)}</strong>
           </section>
 
@@ -463,7 +463,7 @@ function App() {
             className="primary-button"
             onClick={saveTargetSettings}
           >
-            Save Float settings
+            Save these Float settings
           </button>
 
           <button
@@ -471,7 +471,7 @@ function App() {
             className="secondary-button"
             onClick={resetTargetSettings}
           >
-            Reset to Amazen default
+            Restore Amazen’s default
           </button>
 
           <button
@@ -494,10 +494,9 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Cash-up complete</p>
-          <h1>All done</h1>
-
+          <h1>Cash-up complete - Woo Hoo!</h1>
           <p className="app-subtitle">
-            Your Float is ready and your Takings have been calculated.
+            Your Float is ready and your Takings have been worked out.
           </p>
         </header>
 
@@ -507,10 +506,10 @@ function App() {
               ✓
             </div>
 
-            <h2>Everything balances</h2>
+            <h2>Everything matches</h2>
 
             <p>
-              The full amount from the original till has been accounted for.
+              Every dollar from the original Till has been accounted for.
             </p>
           </section>
 
@@ -549,7 +548,7 @@ function App() {
             className="primary-button"
             onClick={startNewCashUp}
           >
-            Start new cash-up
+            Start a new cash-up
           </button>
 
           <button
@@ -557,7 +556,7 @@ function App() {
             className="secondary-button"
             onClick={() => setCurrentStep("final-check")}
           >
-            Back to final summary
+            Review the final summary
           </button>
         </main>
       </div>
@@ -572,10 +571,10 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Step 5 of 5</p>
-          <h1>Final Check</h1>
+          <h1>One final check</h1>
 
           <p className="app-subtitle">
-            Check that the final amounts match your cash-up.
+            Let’s make sure everything adds up before you finish.
           </p>
         </header>
 
@@ -599,15 +598,15 @@ function App() {
 
           {totalsBalance ? (
             <section className="instruction-card" aria-live="polite">
-              <h2>Everything balances</h2>
+              <h2>Everything matches</h2>
 
               <p>
-                The Float and Takings add up to the original amount in the till.
+                The Float and Takings add up to the original Till total.
               </p>
             </section>
           ) : (
             <section className="warning-card" aria-live="assertive">
-              <h2>The totals do not balance</h2>
+              <h2>Something doesn’t match yet</h2>
 
               <p>
                 Go back and review the count and Change Bag instructions before
@@ -622,7 +621,7 @@ function App() {
             disabled={!totalsBalance}
             onClick={finishCashUp}
           >
-            Finish cash-up
+            Finish my cash-up
           </button>
 
           <button
@@ -646,19 +645,19 @@ function App() {
         <div className="app-shell">
           <header className="app-header">
             <p className="app-eyebrow">Step 4 of 5</p>
-            <h1>No Change Bag Needed</h1>
+            <h1>No Change Bag needed</h1>
 
             <p className="app-subtitle">
-              Your Float already has the correct denominations.
+              You’re ready to continue — your Float already has the right notes and coins.
             </p>
           </header>
 
           <main className="app-content">
             <section className="instruction-card">
-              <h2>Good news</h2>
+              <h2>You’re ready to continue</h2>
 
               <p>
-                You do not need to exchange any money through the Change Bag.
+                There’s nothing to exchange through the Change Bag this time.
               </p>
             </section>
 
@@ -667,7 +666,7 @@ function App() {
               className="primary-button"
               onClick={() => setCurrentStep("final-check")}
             >
-              Continue to final check
+              Continue to the final check
             </button>
 
             <button
@@ -687,20 +686,20 @@ function App() {
         <div className="app-shell">
           <header className="app-header">
             <p className="app-eyebrow">Step 4 of 5</p>
-            <h1>Change Bag Help Needed</h1>
+            <h1>We need a little help here</h1>
 
             <p className="app-subtitle">
-              The current Takings cannot cover all Float shortages.
+              This Change Bag exchange cannot be completed safely as entered.
             </p>
           </header>
 
           <main className="app-content">
             <section className="warning-card">
-              <h2>Unable to complete automatically</h2>
+              <h2>This needs a quick manual check</h2>
               <p>{changeBagPlan.reason}</p>
               {changeBagPlan.staffAction && (
                 <p>
-                  <strong>What to do:</strong> {changeBagPlan.staffAction}
+                  <strong>Next step:</strong> {changeBagPlan.staffAction}
                 </p>
               )}
               <dl className="recovery-summary">
@@ -723,7 +722,7 @@ function App() {
               className="secondary-button"
               onClick={() => setCurrentStep("review")}
             >
-              Back to review
+              Back to the results
             </button>
           </main>
         </div>
@@ -734,16 +733,16 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Step 4 of 5</p>
-          <h1>Use the Change Bag</h1>
+          <h1>Now let’s rebuild the Float</h1>
 
           <p className="app-subtitle">
-            Follow each action in order. The app has done the maths for you.
+            Follow each step in order — the maths is already done.
           </p>
         </header>
 
         <main className="app-content">
           <section className="instruction-card">
-            <h2>What is happening?</h2>
+            <h2>What you’re doing now</h2>
 
             <p>
               You are exchanging some Takings for the denominations needed to
@@ -752,15 +751,15 @@ function App() {
           </section>
 
           <div className="section-heading">
-            <h2>Change Bag actions</h2>
-            <p>Complete each physical money movement in order.</p>
+            <h2>Change Bag steps</h2>
+            <p>Move the money in this order so everything stays clear.</p>
           </div>
 
           <section className="change-step-card">
             <span className="change-step-number">1</span>
 
             <div>
-              <h2>Put into Change Bag</h2>
+              <h2>Put into the Change Bag</h2>
 
               <QuantityList items={changeBagPlan.depositItems} />
             </div>
@@ -770,15 +769,15 @@ function App() {
             <span className="change-step-number">2</span>
 
             <div>
-              <h2>Take out of Change Bag</h2>
+              <h2>Take out of the Change Bag</h2>
 
               <QuantityList items={changeBagPlan.withdrawalItems} />
             </div>
           </section>
 
           <div className="section-heading">
-            <h2>Where the money goes</h2>
-            <p>Separate the withdrawn change between Float and Takings.</p>
+            <h2>Where to place the money</h2>
+            <p>Split the money between the Float and Takings as shown below.</p>
           </div>
 
           <section className="destination-grid">
@@ -798,7 +797,7 @@ function App() {
           </section>
 
           <section className="instruction-card">
-            <h2>Check before continuing</h2>
+            <h2>Quick check before you continue</h2>
 
             <p>
               Make sure the Float and Takings now contain exactly the amounts
@@ -811,7 +810,7 @@ function App() {
             className="primary-button"
             onClick={() => setCurrentStep("final-check")}
           >
-            I’ve completed the change
+            Done — the change is complete
           </button>
 
           <button
@@ -834,21 +833,21 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Step 3 of 5</p>
-          <h1>Move Extras to Takings</h1>
+          <h1>Move the extras to Takings</h1>
 
           <p className="app-subtitle">
-            Remove the extra notes and coins from the till.
+            Take the extra notes and coins out of the Till.
           </p>
         </header>
 
         <main className="app-content">
           <section className="move-instruction-card">
-            <p className="move-instruction-label">Take out:</p>
+            <p className="move-instruction-label">Move these:</p>
 
             <MoneyMoveList items={extras} />
 
             <p className="move-destination">
-              Put this money into <strong>Takings</strong>.
+              Place this money into <strong>Takings</strong>.
             </p>
           </section>
 
@@ -869,12 +868,12 @@ function App() {
           </section>
 
           <section className="takings-progress-card" aria-live="polite">
-            <span>Takings so far</span>
+            <span>Takings moved so far</span>
             <strong>{formatCurrency(extrasTotal)}</strong>
           </section>
 
           <section className="instruction-card">
-            <h2>Before continuing</h2>
+            <h2>Quick check</h2>
 
             <p>
               Make sure all the listed extras have been physically removed from
@@ -887,7 +886,7 @@ function App() {
             className="primary-button"
             onClick={() => setCurrentStep("change-bag")}
           >
-            I’ve moved the extras
+            Done — extras are in Takings
           </button>
 
           <button
@@ -895,7 +894,7 @@ function App() {
             className="secondary-button"
             onClick={() => setCurrentStep("review")}
           >
-            Back to review
+            Back to the results
           </button>
         </main>
       </div>
@@ -910,10 +909,10 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <p className="app-eyebrow">Step 2 of 5</p>
-          <h1>Extras and Shortages</h1>
+          <h1>Here’s what needs adjusting</h1>
 
           <p className="app-subtitle">
-            We compared your till with the target Float.
+            Here’s how your Till compares with the target Float.
           </p>
         </header>
 
@@ -930,35 +929,35 @@ function App() {
             </div>
 
             <div className="summary-card">
-              <span>Expected Takings</span>
+              <span>Takings</span>
               <strong>{formatCurrency(expectedTakings)}</strong>
             </div>
           </section>
 
           <div className="section-heading">
-            <h2>Comparison results</h2>
-            <p>See what is extra, short or already correct.</p>
+            <h2>What we found</h2>
+            <p>Check what needs moving and what is already right.</p>
           </div>
 
           <ComparisonSection
             title="Extras"
-            description="These are above the target Float."
+            description="These are above the Float target."
             items={extras}
-            emptyMessage="There are no extra denominations."
+            emptyMessage="No extras here — nice and simple."
           />
 
           <ComparisonSection
             title="Shortages"
-            description="These are below the target Float."
+            description="These are needed to complete the Float."
             items={shortages}
-            emptyMessage="There are no shortages."
+            emptyMessage="No shortages — great."
           />
 
           <ComparisonSection
             title="Correct"
-            description="These already match the target."
+            description="These already match the Float target."
             items={correct}
-            emptyMessage="No denominations match the target yet."
+            emptyMessage="Nothing matches the target yet."
           />
 
           <button
@@ -966,7 +965,7 @@ function App() {
             className="primary-button"
             onClick={() => setCurrentStep("move-extras")}
           >
-            Next: Move Extras to Takings
+            Next: Move the extras to Takings
           </button>
 
           <button
@@ -974,7 +973,7 @@ function App() {
             className="secondary-button"
             onClick={() => setCurrentStep("count")}
           >
-            Back to count
+            Back to the Till count
           </button>
         </main>
       </div>
@@ -988,21 +987,21 @@ function App() {
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">Step 1 of 5</p>
-        <h1>Count the Till</h1>
+        <h1>Let’s count the Till</h1>
 
-        <p className="app-subtitle">Count everything currently in the till.</p>
+        <p className="app-subtitle">Enter everything currently in the Till.</p>
       </header>
 
       <main className="app-content">
         <section className="instruction-card">
-          <h2>Enter each denomination</h2>
+          <h2>Start with what’s in the Till</h2>
 
-          <p>Use the buttons or type the number of notes and coins you have.</p>
+          <p>Use the buttons or type how many notes and coins you have.</p>
         </section>
 
         <div className="section-heading">
-          <h2>Notes and coins</h2>
-          <p>Enter how many of each denomination are in the till.</p>
+          <h2>Till notes and coins</h2>
+          <p>Enter how many of each note and coin are in the Till.</p>
         </div>
 
         <section
@@ -1022,23 +1021,23 @@ function App() {
         </section>
 
         <section className="total-card" aria-live="polite">
-          <span>Total in till</span>
+          <span>Till total</span>
           <strong>{formatCurrency(tillTotal)}</strong>
         </section>
 
         {tillIsEmpty && (
           <section className="validation-card" aria-live="polite">
-            <h2>No money entered yet</h2>
+            <h2>Ready when you are</h2>
 
             <p>
-              Enter the notes and coins currently in the till before continuing.
+              Enter the notes and coins in the Till to get started.
             </p>
           </section>
         )}
 
         {tillIsBelowTarget && !tillIsEmpty && (
           <section className="warning-card" aria-live="assertive">
-            <h2>The till is below the target Float</h2>
+            <h2>The Till is below the Float target</h2>
 
             <p>
               The till contains {formatCurrency(tillTotal)}, but the target
@@ -1058,7 +1057,7 @@ function App() {
           disabled={!canReviewCashUp}
           onClick={() => setCurrentStep("review")}
         >
-          Review my cash-up
+          Check my totals
         </button>
 
         <section className="target-card">
@@ -1079,7 +1078,7 @@ function App() {
           className="secondary-button"
           onClick={() => setCurrentStep("help")}
         >
-          How it works
+          How this works
         </button>
       </main>
     </div>
