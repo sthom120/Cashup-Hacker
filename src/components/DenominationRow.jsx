@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 import {
   MAX_COUNT,
   sanitiseCountInput,
@@ -8,6 +10,10 @@ function DenominationRow({
   count,
   onCountChange,
 }) {
+  const labelId = useId();
+  const subtotalId = useId();
+  const inputId = useId();
+
   const safeCount = sanitiseCountInput(count);
 
   const handleInputChange = (event) => {
@@ -31,15 +37,29 @@ function DenominationRow({
   const subtotal =
     safeCount * denomination.valueInCents;
 
+  const formattedSubtotal =
+    (subtotal / 100).toFixed(2);
+
   return (
-    <div className="denomination-row">
+    <div
+      className="denomination-row"
+      role="group"
+      aria-labelledby={labelId}
+      aria-describedby={subtotalId}
+    >
       <div>
-        <strong className="denomination-label">
+        <strong
+          id={labelId}
+          className="denomination-label"
+        >
           {denomination.label}
         </strong>
 
-        <span className="denomination-subtotal">
-          Subtotal: ${(subtotal / 100).toFixed(2)}
+        <span
+          id={subtotalId}
+          className="denomination-subtotal"
+        >
+          Subtotal: ${formattedSubtotal}
         </span>
       </div>
 
@@ -49,12 +69,20 @@ function DenominationRow({
           className="count-button"
           onClick={decreaseCount}
           disabled={safeCount === 0}
-          aria-label={`Remove one ${denomination.label}`}
+          aria-label={`Decrease ${denomination.label} count`}
         >
-          −
+          <span aria-hidden="true">−</span>
         </button>
 
+        <label
+          htmlFor={inputId}
+          className="visually-hidden"
+        >
+          Number of {denomination.label}
+        </label>
+
         <input
+          id={inputId}
           type="number"
           min="0"
           max={MAX_COUNT}
@@ -64,7 +92,7 @@ function DenominationRow({
           value={safeCount}
           onChange={handleInputChange}
           className="count-input"
-          aria-label={`${denomination.label} count`}
+          aria-describedby={subtotalId}
         />
 
         <button
@@ -72,9 +100,9 @@ function DenominationRow({
           className="count-button"
           onClick={increaseCount}
           disabled={safeCount >= MAX_COUNT}
-          aria-label={`Add one ${denomination.label}`}
+          aria-label={`Increase ${denomination.label} count`}
         >
-          +
+          <span aria-hidden="true">+</span>
         </button>
       </div>
     </div>

@@ -777,3 +777,38 @@ svg {
     transform: none;
   }
 }
+
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.count-button,
+.count-input,
+.float-target-input {
+  min-width: 2.75rem;
+}
+
+.count-button {
+  touch-action: manipulation;
+}
+
+.count-input,
+.float-target-input {
+  font-size: 1rem;
+}
+
+@media (pointer: coarse) {
+  .count-button,
+  .count-input,
+  .float-target-input {
+    min-height: 3rem;
+  }
+}

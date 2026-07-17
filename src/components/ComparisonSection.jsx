@@ -1,27 +1,55 @@
-function ComparisonSection({ title, description, items, emptyMessage }) {
+import { useId } from "react";
+
+function ComparisonSection({
+  title,
+  description,
+  items,
+  emptyMessage,
+}) {
+  const headingId = useId();
+  const descriptionId = useId();
+
   return (
-    <section className="comparison-section">
+    <section
+      className="comparison-section"
+      aria-labelledby={headingId}
+      aria-describedby={descriptionId}
+    >
       <div className="comparison-heading">
-        <h2>{title}</h2>
-        <p>{description}</p>
+        <h2 id={headingId}>{title}</h2>
+        <p id={descriptionId}>{description}</p>
       </div>
 
       {items.length > 0 ? (
         <ul className="comparison-list">
-          {items.map((item) => (
-            <li key={item.id} className="comparison-item">
-              <strong>
-                {Math.abs(item.difference)} × {item.label}
-              </strong>
+          {items.map((item) => {
+            const quantity =
+              Math.abs(item.difference);
 
-              <span>
-                Counted {item.counted} · Target {item.target}
-              </span>
-            </li>
-          ))}
+            return (
+              <li
+                key={item.id}
+                className="comparison-item"
+              >
+                <strong>
+                  {quantity} × {item.label}
+                </strong>
+
+                <span>
+                  Counted {item.counted}. Target{" "}
+                  {item.target}.
+                </span>
+              </li>
+            );
+          })}
         </ul>
       ) : (
-        <p className="empty-message">{emptyMessage}</p>
+        <p
+          className="empty-message"
+          role="status"
+        >
+          {emptyMessage}
+        </p>
       )}
     </section>
   );

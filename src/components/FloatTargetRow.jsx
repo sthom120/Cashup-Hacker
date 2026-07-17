@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 import {
   MAX_COUNT,
   sanitiseCountInput,
@@ -8,6 +10,10 @@ function FloatTargetRow({
   targetCount,
   onTargetChange,
 }) {
+  const labelId = useId();
+  const valueId = useId();
+  const inputId = useId();
+
   const safeTargetCount =
     sanitiseCountInput(targetCount);
 
@@ -18,22 +24,37 @@ function FloatTargetRow({
   };
 
   return (
-    <div className="float-target-row">
+    <div
+      className="float-target-row"
+      role="group"
+      aria-labelledby={labelId}
+      aria-describedby={valueId}
+    >
       <div>
-        <strong className="denomination-label">
+        <strong
+          id={labelId}
+          className="denomination-label"
+        >
           {denomination.label}
         </strong>
 
-        <span className="float-target-value">
+        <span
+          id={valueId}
+          className="float-target-value"
+        >
           Each one is $
           {(denomination.valueInCents / 100).toFixed(2)}
         </span>
       </div>
 
-      <label className="float-target-input-group">
+      <label
+        htmlFor={inputId}
+        className="float-target-input-group"
+      >
         <span>Target count</span>
 
         <input
+          id={inputId}
           type="number"
           min="0"
           max={MAX_COUNT}
@@ -43,6 +64,7 @@ function FloatTargetRow({
           value={safeTargetCount}
           onChange={handleChange}
           className="float-target-input"
+          aria-describedby={valueId}
         />
       </label>
     </div>
