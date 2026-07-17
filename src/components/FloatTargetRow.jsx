@@ -1,17 +1,20 @@
+import {
+  MAX_COUNT,
+  sanitiseCountInput,
+} from "../utils/countValidation";
+
 function FloatTargetRow({
   denomination,
   targetCount,
   onTargetChange,
 }) {
+  const safeTargetCount =
+    sanitiseCountInput(targetCount);
+
   const handleChange = (event) => {
-    const parsedValue = Number.parseInt(event.target.value, 10);
-
-    if (Number.isNaN(parsedValue)) {
-      onTargetChange(0);
-      return;
-    }
-
-    onTargetChange(Math.max(0, parsedValue));
+    onTargetChange(
+      sanitiseCountInput(event.target.value),
+    );
   };
 
   return (
@@ -22,7 +25,8 @@ function FloatTargetRow({
         </strong>
 
         <span className="float-target-value">
-          Each one is ${(denomination.valueInCents / 100).toFixed(2)}
+          Each one is $
+          {(denomination.valueInCents / 100).toFixed(2)}
         </span>
       </div>
 
@@ -32,8 +36,11 @@ function FloatTargetRow({
         <input
           type="number"
           min="0"
+          max={MAX_COUNT}
           step="1"
-          value={targetCount}
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={safeTargetCount}
           onChange={handleChange}
           className="float-target-input"
         />

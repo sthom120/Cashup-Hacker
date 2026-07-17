@@ -680,3 +680,8 @@ svg {
   color: #59636e;
   line-height: 1.5;
 }
+
+.count-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

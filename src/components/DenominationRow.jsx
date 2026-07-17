@@ -1,23 +1,35 @@
+import {
+  MAX_COUNT,
+  sanitiseCountInput,
+} from "../utils/countValidation";
+
 function DenominationRow({
   denomination,
   count,
   onCountChange,
 }) {
+  const safeCount = sanitiseCountInput(count);
+
+  const handleInputChange = (event) => {
+    onCountChange(
+      sanitiseCountInput(event.target.value),
+    );
+  };
+
   const decreaseCount = () => {
-    onCountChange(Math.max(0, count - 1));
+    onCountChange(
+      sanitiseCountInput(safeCount - 1),
+    );
   };
 
   const increaseCount = () => {
-    onCountChange(count + 1);
+    onCountChange(
+      sanitiseCountInput(safeCount + 1),
+    );
   };
 
-  const handleInputChange = (event) => {
-    const value = Number.parseInt(event.target.value, 10);
-
-    onCountChange(Number.isNaN(value) ? 0 : Math.max(0, value));
-  };
-
-  const subtotalInCents = count * denomination.valueInCents;
+  const subtotal =
+    safeCount * denomination.valueInCents;
 
   return (
     <div className="denomination-row">
@@ -25,8 +37,9 @@ function DenominationRow({
         <strong className="denomination-label">
           {denomination.label}
         </strong>
+
         <span className="denomination-subtotal">
-          ${(subtotalInCents / 100).toFixed(2)}
+          Subtotal: ${(subtotal / 100).toFixed(2)}
         </span>
       </div>
 
@@ -35,18 +48,22 @@ function DenominationRow({
           type="button"
           className="count-button"
           onClick={decreaseCount}
+          disabled={safeCount === 0}
           aria-label={`Remove one ${denomination.label}`}
         >
           −
         </button>
 
         <input
-          className="count-input"
           type="number"
           min="0"
+          max={MAX_COUNT}
           step="1"
-          value={count}
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={safeCount}
           onChange={handleInputChange}
+          className="count-input"
           aria-label={`${denomination.label} count`}
         />
 
@@ -54,6 +71,7 @@ function DenominationRow({
           type="button"
           className="count-button"
           onClick={increaseCount}
+          disabled={safeCount >= MAX_COUNT}
           aria-label={`Add one ${denomination.label}`}
         >
           +
