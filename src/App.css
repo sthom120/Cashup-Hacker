@@ -1,14 +1,18 @@
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
   background: #f5f6f8;
   color: #20242a;
   font-family:
@@ -16,7 +20,10 @@ body {
 }
 
 button,
-input {
+input,
+textarea,
+select {
+  max-width: 100%;
   font: inherit;
 }
 
@@ -24,66 +31,83 @@ button {
   cursor: pointer;
 }
 
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
 .app-shell {
-  min-height: 100vh;
+  min-width: 0;
+  min-height: 100dvh;
 }
 
 .app-header {
-  padding: 2rem 1.25rem 1.5rem;
+  padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem)
+    clamp(1.25rem, 4vw, 2rem);
   background: #ffffff;
   border-bottom: 1px solid #dfe3e8;
 }
 
+.app-header > * {
+  width: min(100%, 40rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
 .app-header h1 {
-  margin: 0;
-  font-size: clamp(2rem, 8vw, 3rem);
-  line-height: 1;
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.9rem, 8vw, 3rem);
+  line-height: 1.05;
 }
 
 .app-eyebrow {
-  margin: 0 0 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
   color: #59636e;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .app-subtitle {
-  max-width: 34rem;
-  margin: 0.9rem 0 0;
+  margin-top: 0.9rem;
+  margin-bottom: 0;
   color: #59636e;
   font-size: 1rem;
   line-height: 1.5;
 }
 
 .app-content {
-  width: min(100% - 2rem, 40rem);
+  width: min(100%, 42rem);
   margin: 0 auto;
-  padding: 1.5rem 0 3rem;
+  padding: clamp(1rem, 4vw, 2rem) clamp(0.75rem, 4vw, 1.25rem) 3rem;
 }
 
-.welcome-card,
-.target-card {
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-  box-shadow: 0 0.35rem 1rem rgb(0 0 0 / 7%);
+.app-content > * {
+  min-width: 0;
 }
 
-.welcome-card {
-  padding: 1.5rem;
+.section-heading {
+  margin: 1.75rem 0 0.75rem;
 }
 
-.welcome-card h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.5rem;
+.section-heading:first-child {
+  margin-top: 0;
 }
 
-.welcome-card p {
-  margin: 0 0 1.5rem;
+.section-heading h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.section-heading p {
+  margin: 0.3rem 0 0;
   color: #59636e;
-  line-height: 1.55;
+  line-height: 1.45;
 }
 
 .primary-button,
@@ -93,6 +117,7 @@ button {
   padding: 0.85rem 1rem;
   border-radius: 0.8rem;
   font-weight: 700;
+  white-space: normal;
 }
 
 .primary-button {
@@ -119,132 +144,133 @@ button {
 }
 
 .primary-button:focus-visible,
-.secondary-button:focus-visible {
+.secondary-button:focus-visible,
+.count-input:focus-visible,
+.count-button:focus-visible,
+.float-target-input:focus-visible {
   outline: 3px solid #6d7b8a;
   outline-offset: 3px;
 }
 
-.target-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: 1.25rem 1.5rem;
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
-.target-card span {
-  color: #59636e;
-  font-weight: 600;
-}
-
-.target-card strong {
-  font-size: 1.35rem;
-}
-
-@media (min-width: 700px) {
-  .app-header {
-    padding: 3rem 2rem 2rem;
-  }
-
-  .app-content {
-    padding-top: 2rem;
-  }
-
-  .welcome-card {
-    padding: 2rem;
-  }
-}
-
-.instruction-card {
-  margin-bottom: 1rem;
-  padding: 1.25rem;
+.instruction-card,
+.welcome-card,
+.target-card,
+.summary-card,
+.comparison-section,
+.move-instruction-card,
+.money-direction-card,
+.takings-progress-card,
+.change-step-card,
+.destination-card,
+.warning-card,
+.help-section,
+.recovery-card,
+.completion-card,
+.completion-details,
+.float-target-row {
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #dfe3e8;
   border-radius: 1rem;
 }
 
-.instruction-card h2 {
-  margin: 0 0 0.5rem;
+.instruction-card,
+.welcome-card,
+.comparison-section,
+.move-instruction-card,
+.change-step-card,
+.destination-card,
+.warning-card,
+.help-section,
+.recovery-card,
+.completion-card {
+  padding: clamp(1rem, 4vw, 1.5rem);
+}
+
+.instruction-card,
+.comparison-section,
+.move-instruction-card,
+.money-direction-card,
+.takings-progress-card,
+.change-step-card,
+.warning-card,
+.help-section,
+.recovery-card,
+.completion-card {
+  margin-bottom: 1rem;
+}
+
+.instruction-card h2,
+.welcome-card h2,
+.comparison-heading h2,
+.change-step-card h2,
+.destination-card h2,
+.warning-card h2,
+.help-section h2,
+.recovery-card h2,
+.completion-card h2 {
+  margin-top: 0;
+}
+
+.instruction-card h2,
+.comparison-heading h2 {
+  margin-bottom: 0.5rem;
   font-size: 1.25rem;
 }
 
-.instruction-card p {
-  margin: 0;
+.instruction-card p,
+.comparison-heading p,
+.welcome-card p,
+.help-steps span,
+.term-card dd,
+.recovery-card > p,
+.completion-card p {
   color: #59636e;
   line-height: 1.5;
 }
 
-.denomination-list {
-  display: grid;
-  gap: 0.75rem;
+.instruction-card p,
+.comparison-heading p,
+.recovery-card > p,
+.completion-card p {
+  margin: 0;
 }
 
-.denomination-row {
+.target-card,
+.total-card,
+.takings-progress-card,
+.completion-details {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 0.9rem;
+  padding: 1.15rem clamp(1rem, 4vw, 1.5rem);
 }
 
-.denomination-label,
-.denomination-subtotal {
-  display: block;
+.target-card {
+  margin-top: 1rem;
 }
 
-.denomination-label {
-  font-size: 1.2rem;
-}
-
-.denomination-subtotal {
-  margin-top: 0.25rem;
+.target-card span,
+.summary-card span,
+.takings-progress-card span,
+.completion-details span {
   color: #59636e;
-  font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.count-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.count-button {
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 2px solid #20242a;
-  border-radius: 0.75rem;
-  background: #ffffff;
-  color: #20242a;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.count-input {
-  width: 4rem;
-  height: 2.75rem;
-  border: 2px solid #b7bec7;
-  border-radius: 0.75rem;
-  text-align: center;
-  font-weight: 700;
-}
-
-.count-input:focus-visible,
-.count-button:focus-visible {
-  outline: 3px solid #6d7b8a;
-  outline-offset: 3px;
+.target-card strong,
+.summary-card strong {
+  font-size: 1.25rem;
 }
 
 .total-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   margin: 1rem 0;
-  padding: 1.25rem 1.5rem;
   background: #20242a;
   color: #ffffff;
   border-radius: 1rem;
@@ -254,23 +280,83 @@ button {
   font-weight: 600;
 }
 
-.total-card strong {
-  font-size: 1.5rem;
+.total-card strong,
+.takings-progress-card strong {
+  flex-shrink: 0;
+  font-size: 1.45rem;
 }
 
-@media (max-width: 420px) {
-  .denomination-row {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.denomination-list,
+.float-target-list,
+.comparison-list,
+.money-move-list,
+.quantity-list,
+.term-list,
+.recovery-summary {
+  display: grid;
+  gap: 0.75rem;
+}
 
-  .count-controls {
-    width: 100%;
-  }
+.denomination-row,
+.float-target-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
 
-  .count-input {
-    flex: 1;
-  }
+.denomination-row > div:first-child,
+.float-target-row > div:first-child {
+  min-width: 0;
+}
+
+.denomination-label,
+.denomination-subtotal,
+.float-target-value {
+  display: block;
+}
+
+.denomination-label {
+  font-size: 1.2rem;
+}
+
+.denomination-subtotal,
+.float-target-value {
+  margin-top: 0.25rem;
+  color: #59636e;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.count-controls {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(3.5rem, 4rem) 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.count-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 2px solid #20242a;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #20242a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.count-input {
+  width: 100%;
+  min-width: 0;
+  height: 2.75rem;
+  border: 2px solid #b7bec7;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-weight: 700;
 }
 
 .summary-grid {
@@ -284,61 +370,42 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
+  padding: 1.15rem;
 }
 
-.summary-card span {
-  color: #59636e;
-  font-weight: 600;
-}
-
-.summary-card strong {
-  font-size: 1.3rem;
-}
-
-.comparison-section {
-  margin-bottom: 1rem;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-}
-
-.comparison-heading h2 {
-  margin: 0 0 0.35rem;
-  font-size: 1.25rem;
-}
-
-.comparison-heading p {
-  margin: 0;
-  color: #59636e;
-  line-height: 1.5;
-}
-
-.comparison-list {
-  display: grid;
-  gap: 0.65rem;
+.comparison-list,
+.money-move-list,
+.quantity-list,
+.term-list,
+.recovery-summary {
   margin: 1rem 0 0;
   padding: 0;
   list-style: none;
 }
 
-.comparison-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem;
+.comparison-item,
+.money-move-item,
+.quantity-list-item,
+.term-card,
+.recovery-summary div,
+.money-location {
+  min-width: 0;
+  padding: 0.9rem;
   background: #f5f6f8;
   border-radius: 0.75rem;
 }
 
+.comparison-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .comparison-item strong,
 .comparison-item span {
-  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .comparison-item span {
@@ -352,149 +419,64 @@ button {
   color: #59636e;
 }
 
-@media (min-width: 650px) {
-  .summary-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .summary-card {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
-.move-instruction-card,
-.money-direction-card,
-.takings-progress-card {
-  margin-bottom: 1rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-}
-
-.move-instruction-card {
-  padding: 1.5rem;
-}
-
-.move-instruction-label {
+.move-instruction-label,
+.destination-label {
   margin: 0 0 0.75rem;
-  color: #59636e;
-  font-weight: 700;
-}
-
-.money-move-list {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.money-move-item {
-  padding: 1rem;
-  background: #f5f6f8;
-  border-radius: 0.75rem;
-  font-size: 1.2rem;
-}
-
-.move-destination {
-  margin: 1.25rem 0 0;
-  padding-top: 1.25rem;
-  border-top: 1px solid #dfe3e8;
-  font-size: 1.1rem;
-  line-height: 1.5;
-}
-
-.money-direction-card {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  text-align: center;
-}
-
-.money-location {
-  display: grid;
-  gap: 0.25rem;
-  padding: 1rem;
-  background: #f5f6f8;
-  border-radius: 0.75rem;
-}
-
-.money-location-label {
   color: #59636e;
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.money-direction-arrow {
-  font-size: 2rem;
-  font-weight: 700;
+.money-move-item {
+  font-size: 1.15rem;
 }
 
-.takings-progress-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
+.move-destination {
+  margin: 1.25rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid #dfe3e8;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
-.takings-progress-card span {
-  color: #59636e;
-  font-weight: 600;
-}
-
-.takings-progress-card strong {
-  font-size: 1.5rem;
-}
-
-@media (max-width: 420px) {
-  .money-direction-card {
-    grid-template-columns: 1fr;
-  }
-
-  .money-direction-arrow {
-    transform: rotate(90deg);
-  }
-}
-
-.quantity-list {
+.money-direction-card {
   display: grid;
-  gap: 0.65rem;
-  margin: 0.75rem 0 0;
-  padding: 0;
-  list-style: none;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.15rem;
+  text-align: center;
 }
 
-.quantity-list-item {
-  padding: 0.85rem 1rem;
-  background: #f5f6f8;
-  border-radius: 0.75rem;
+.money-location {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.money-location-label {
+  color: #59636e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.money-direction-arrow {
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
 .change-step-card {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 1rem;
-  margin-bottom: 1rem;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-}
-
-.change-step-card h2,
-.destination-card h2 {
-  margin: 0;
 }
 
 .change-step-number {
   display: grid;
   width: 2.5rem;
   height: 2.5rem;
+  flex-shrink: 0;
   place-items: center;
   background: #20242a;
   color: #ffffff;
@@ -508,50 +490,13 @@ button {
   margin-bottom: 1rem;
 }
 
-.destination-card {
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-}
-
 .destination-label {
-  margin: 0 0 0.25rem;
-  color: #59636e;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  margin-bottom: 0.25rem;
 }
 
 .warning-card {
-  margin-bottom: 1rem;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 2px solid #20242a;
-  border-radius: 1rem;
-}
-
-.warning-card h2 {
-  margin-top: 0;
-}
-
-@media (min-width: 650px) {
-  .destination-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.help-section {
-  margin-bottom: 1rem;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-}
-
-.help-section h2 {
-  margin: 0 0 1rem;
-  font-size: 1.3rem;
+  border-width: 2px;
+  border-color: #20242a;
 }
 
 .help-steps {
@@ -562,7 +507,7 @@ button {
 }
 
 .help-steps li {
-  padding-left: 0.35rem;
+  padding-left: 0.25rem;
 }
 
 .help-steps strong,
@@ -572,20 +517,10 @@ button {
 
 .help-steps span {
   margin-top: 0.25rem;
-  color: #59636e;
-  line-height: 1.5;
 }
 
 .term-list {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-}
-
-.term-card {
-  padding: 1rem;
-  background: #f5f6f8;
-  border-radius: 0.75rem;
+  margin-top: 0;
 }
 
 .term-card dt {
@@ -595,33 +530,48 @@ button {
 
 .term-card dd {
   margin: 0.35rem 0 0;
-  color: #59636e;
-  line-height: 1.5;
 }
 
-.recovery-card {
-  margin-bottom: 1rem;
-  padding: 1.5rem;
-  background: #ffffff;
-  border: 1px solid #dfe3e8;
-  border-radius: 1rem;
-}
-
-.recovery-card h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.4rem;
-}
-
-.recovery-card > p {
-  margin: 0;
-  color: #59636e;
-  line-height: 1.5;
-}
-
-.recovery-summary {
+.float-target-input-group {
   display: grid;
-  gap: 0.75rem;
-  margin: 1.25rem 0 0;
+  gap: 0.35rem;
+  min-width: 0;
+  color: #59636e;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.float-target-input {
+  width: 5rem;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 2px solid #b7bec7;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.completion-card {
+  text-align: center;
+}
+
+.completion-icon {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  place-items: center;
+  background: #20242a;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.completion-card p {
+  max-width: 28rem;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .recovery-summary div {
@@ -629,9 +579,6 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem;
-  background: #f5f6f8;
-  border-radius: 0.75rem;
 }
 
 .recovery-summary dt {
@@ -643,4 +590,74 @@ button {
   margin: 0;
   font-weight: 800;
   text-align: right;
+}
+
+@media (min-width: 650px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .summary-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .destination-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .app-content {
+    padding-right: 0.65rem;
+    padding-left: 0.65rem;
+  }
+
+  .denomination-row,
+  .float-target-row {
+    grid-template-columns: 1fr;
+  }
+
+  .count-controls {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    width: 100%;
+  }
+
+  .float-target-input-group,
+  .float-target-input {
+    width: 100%;
+  }
+
+  .comparison-item {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-item span {
+    text-align: left;
+  }
+
+  .money-direction-card {
+    grid-template-columns: 1fr;
+  }
+
+  .money-direction-arrow {
+    transform: rotate(90deg);
+  }
+
+  .target-card,
+  .total-card,
+  .takings-progress-card,
+  .completion-details,
+  .recovery-summary div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .target-card strong,
+  .total-card strong,
+  .takings-progress-card strong,
+  .completion-details strong,
+  .recovery-summary dd {
+    text-align: left;
+  }
 }

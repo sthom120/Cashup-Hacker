@@ -379,6 +379,13 @@ function App() {
             </p>
           </section>
 
+          <div className="section-heading">
+            <h2>Denomination targets</h2>
+            <p>
+              Set how many of each note and coin should remain in the Float.
+            </p>
+          </div>
+
           <section
             className="float-target-list"
             aria-label="Float denomination targets"
@@ -675,6 +682,11 @@ function App() {
             </p>
           </section>
 
+          <div className="section-heading">
+            <h2>Change Bag actions</h2>
+            <p>Complete each physical money movement in order.</p>
+          </div>
+
           <section className="change-step-card">
             <span className="change-step-number">1</span>
 
@@ -694,6 +706,13 @@ function App() {
               <QuantityList items={changeBagPlan.withdrawalItems} />
             </div>
           </section>
+
+          <div className="section-heading">
+            <h2>Where the money goes</h2>
+            <p>
+              Separate the withdrawn change between Float and Takings.
+            </p>
+          </div>
 
           <section className="destination-grid">
             <section className="destination-card">
@@ -849,6 +868,11 @@ function App() {
             </div>
           </section>
 
+          <div className="section-heading">
+            <h2>Comparison results</h2>
+            <p>See what is extra, short or already correct.</p>
+          </div>
+
           <ComparisonSection
             title="Extras"
             description="These are above the target Float."
@@ -908,6 +932,11 @@ function App() {
 
           <p>Use the buttons or type the number of notes and coins you have.</p>
         </section>
+
+        <div className="section-heading">
+          <h2>Notes and coins</h2>
+          <p>Enter how many of each denomination are in the till.</p>
+        </div>
 
         <section
           className="denomination-list"
