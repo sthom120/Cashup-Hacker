@@ -698,6 +698,24 @@ function App() {
             <section className="warning-card">
               <h2>Unable to complete automatically</h2>
               <p>{changeBagPlan.reason}</p>
+              {changeBagPlan.staffAction && (
+                <p>
+                  <strong>What to do:</strong> {changeBagPlan.staffAction}
+                </p>
+              )}
+              <dl className="recovery-summary">
+                <div>
+                  <dt>Float shortages</dt>
+                  <dd>{formatCurrency(changeBagPlan.shortagesTotalInCents)}</dd>
+                </div>
+
+                <div>
+                  <dt>Available extras</dt>
+                  <dd>
+                    {formatCurrency(changeBagPlan.availableExtrasTotalInCents)}
+                  </dd>
+                </div>
+              </dl>
             </section>
 
             <button
