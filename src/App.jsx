@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 import ComparisonSection from "./components/ComparisonSection";
@@ -26,45 +26,90 @@ import {
   saveFloatTargets,
 } from "./utils/floatTargetStorage";
 
+import {
+  clearCashUpProgress,
+  hasMeaningfulCashUpProgress,
+  loadCashUpProgress,
+  saveCashUpProgress,
+} from "./utils/cashUpProgressStorage";
+
 function App() {
   const initialCounts = Object.fromEntries(
     denominations.map((denomination) => [denomination.id, 0]),
   );
 
-  const [counts, setCounts] = useState(initialCounts);
-  const [floatTargets, setFloatTargets] = useState(() =>
-    loadFloatTargets(),
+  const [savedProgress] = useState(() => loadCashUpProgress());
+
+  const [counts, setCounts] = useState(savedProgress?.counts ?? initialCounts);
+
+  const [floatTargets, setFloatTargets] = useState(() => loadFloatTargets());
+
+  const [currentStep, setCurrentStep] = useState(
+    savedProgress?.currentStep ?? "count",
   );
-  const [currentStep, setCurrentStep] = useState("count");
-  const [completedAt, setCompletedAt] = useState(null);
+
+  const [completedAt, setCompletedAt] = useState(() => {
+    if (!savedProgress?.completedAt) {
+      return null;
+    }
+
+    const restoredDate = new Date(savedProgress.completedAt);
+
+    return Number.isNaN(restoredDate.getTime()) ? null : restoredDate;
+  });
+
+  const [showRecoveryPrompt, setShowRecoveryPrompt] = useState(() =>
+    hasMeaningfulCashUpProgress(savedProgress),
+  );
 
   const tillTotal = calculateTillTotal(counts);
   const targetFloatTotal = calculateTargetFloatTotal(floatTargets);
 
-  const expectedTakings = calculateExpectedTakings(
-    counts,
-    floatTargets,
-  );
+  const expectedTakings = calculateExpectedTakings(counts, floatTargets);
 
   const comparison = compareWithTarget(counts, floatTargets);
 
-  const extras = comparison.filter(
-    (item) => item.status === "extra",
-  );
+  const extras = comparison.filter((item) => item.status === "extra");
 
-  const shortages = comparison.filter(
-    (item) => item.status === "short",
-  );
+  const shortages = comparison.filter((item) => item.status === "short");
 
-  const correct = comparison.filter(
-    (item) => item.status === "correct",
-  );
+  const correct = comparison.filter((item) => item.status === "correct");
 
   const extrasTotal = calculateExtrasTotal(comparison);
   const changeBagPlan = calculateChangeBagPlan(comparison);
 
-  const totalsBalance =
-    targetFloatTotal + expectedTakings === tillTotal;
+  const totalsBalance = targetFloatTotal + expectedTakings === tillTotal;
+
+  useEffect(() => {
+    const cashUpSteps = [
+      "count",
+      "review",
+      "move-extras",
+      "change-bag",
+      "final-check",
+      "complete",
+    ];
+
+    if (!cashUpSteps.includes(currentStep)) {
+      return;
+    }
+
+    const hasEnteredCounts = Object.values(counts).some((count) => count > 0);
+
+    const shouldSave =
+      hasEnteredCounts || currentStep !== "count" || completedAt !== null;
+
+    if (!shouldSave) {
+      clearCashUpProgress();
+      return;
+    }
+
+    saveCashUpProgress({
+      counts,
+      currentStep,
+      completedAt: completedAt ? completedAt.toISOString() : null,
+    });
+  }, [counts, currentStep, completedAt]);
 
   const updateCount = (denominationId, newCount) => {
     setCounts((currentCounts) => ({
@@ -83,8 +128,22 @@ function App() {
   };
 
   const startNewCashUp = () => {
+    clearCashUpProgress();
     setCounts(initialCounts);
     setCompletedAt(null);
+    setShowRecoveryPrompt(false);
+    setCurrentStep("count");
+  };
+
+  const continueSavedCashUp = () => {
+    setShowRecoveryPrompt(false);
+  };
+
+  const discardSavedCashUp = () => {
+    clearCashUpProgress();
+    setCounts(initialCounts);
+    setCompletedAt(null);
+    setShowRecoveryPrompt(false);
     setCurrentStep("count");
   };
 
@@ -106,6 +165,71 @@ function App() {
   };
 
   /*
+   * RECOVERY PROMPT
+   */
+  if (showRecoveryPrompt) {
+    const savedStepLabel =
+      currentStep === "complete"
+        ? "Cash-up complete"
+        : currentStep
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <p className="app-eyebrow">Unfinished cash-up</p>
+          <h1>Continue where you left off?</h1>
+
+          <p className="app-subtitle">
+            We found a cash-up that was not cleared from this device.
+          </p>
+        </header>
+
+        <main className="app-content">
+          <section className="recovery-card">
+            <h2>Your progress is safe</h2>
+
+            <p>
+              Your till counts and current cash-up step were saved
+              automatically.
+            </p>
+
+            <dl className="recovery-summary">
+              <div>
+                <dt>Saved till total</dt>
+                <dd>{formatCurrency(tillTotal)}</dd>
+              </div>
+
+              <div>
+                <dt>Saved step</dt>
+                <dd>{savedStepLabel}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={continueSavedCashUp}
+          >
+            Continue cash-up
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={discardSavedCashUp}
+          >
+            Start over
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  /*
    * HELP
    */
   if (currentStep === "help") {
@@ -116,8 +240,8 @@ function App() {
           <h1>How Cash-up Hacker Works</h1>
 
           <p className="app-subtitle">
-            The app guides you through rebuilding the Float without
-            needing to do the maths yourself.
+            The app guides you through rebuilding the Float without needing to
+            do the maths yourself.
           </p>
         </header>
 
@@ -129,39 +253,36 @@ function App() {
               <li>
                 <strong>Count the Till</strong>
                 <span>
-                  Enter how many notes and coins are currently in the
-                  till.
+                  Enter how many notes and coins are currently in the till.
                 </span>
               </li>
 
               <li>
                 <strong>Review the result</strong>
-                <span>
-                  The app compares your count with the target Float.
-                </span>
+                <span>The app compares your count with the target Float.</span>
               </li>
 
               <li>
                 <strong>Move Extras</strong>
                 <span>
-                  Remove denominations above the target and put them
-                  into Takings.
+                  Remove denominations above the target and put them into
+                  Takings.
                 </span>
               </li>
 
               <li>
                 <strong>Use the Change Bag</strong>
                 <span>
-                  Exchange some Takings for the denominations missing
-                  from the Float.
+                  Exchange some Takings for the denominations missing from the
+                  Float.
                 </span>
               </li>
 
               <li>
                 <strong>Complete the cash-up</strong>
                 <span>
-                  Confirm that the Float and Takings add up to the
-                  original till total.
+                  Confirm that the Float and Takings add up to the original till
+                  total.
                 </span>
               </li>
             </ol>
@@ -174,40 +295,40 @@ function App() {
               <div className="term-card">
                 <dt>Float</dt>
                 <dd>
-                  The money that stays in the till so staff can give
-                  customers change.
+                  The money that stays in the till so staff can give customers
+                  change.
                 </dd>
               </div>
 
               <div className="term-card">
                 <dt>Takings</dt>
                 <dd>
-                  The money earned during the trading period that is
-                  removed from the till.
+                  The money earned during the trading period that is removed
+                  from the till.
                 </dd>
               </div>
 
               <div className="term-card">
                 <dt>Change Bag</dt>
                 <dd>
-                  The supply of notes and coins used to exchange money
-                  and rebuild the correct Float.
+                  The supply of notes and coins used to exchange money and
+                  rebuild the correct Float.
                 </dd>
               </div>
 
               <div className="term-card">
                 <dt>Extra</dt>
                 <dd>
-                  A denomination where the till contains more than the
-                  Float target.
+                  A denomination where the till contains more than the Float
+                  target.
                 </dd>
               </div>
 
               <div className="term-card">
                 <dt>Shortage</dt>
                 <dd>
-                  A denomination where the till contains fewer than
-                  the Float target.
+                  A denomination where the till contains fewer than the Float
+                  target.
                 </dd>
               </div>
             </dl>
@@ -217,8 +338,8 @@ function App() {
             <h2>You do not need to calculate anything</h2>
 
             <p>
-              Follow each instruction in order. The app will tell you
-              what money to move and where to put it.
+              Follow each instruction in order. The app will tell you what money
+              to move and where to put it.
             </p>
           </section>
 
@@ -245,8 +366,7 @@ function App() {
           <h1>Float Targets</h1>
 
           <p className="app-subtitle">
-            Set how many of each denomination should remain in the
-            Float.
+            Set how many of each denomination should remain in the Float.
           </p>
         </header>
 
@@ -255,8 +375,7 @@ function App() {
             <h2>Current Float setup</h2>
 
             <p>
-              These targets control every comparison and cash-up
-              instruction.
+              These targets control every comparison and cash-up instruction.
             </p>
           </section>
 
@@ -268,14 +387,9 @@ function App() {
               <FloatTargetRow
                 key={denomination.id}
                 denomination={denomination}
-                targetCount={
-                  floatTargets[denomination.id] ?? 0
-                }
+                targetCount={floatTargets[denomination.id] ?? 0}
                 onTargetChange={(newTarget) =>
-                  updateFloatTarget(
-                    denomination.id,
-                    newTarget,
-                  )
+                  updateFloatTarget(denomination.id, newTarget)
                 }
               />
             ))}
@@ -338,8 +452,7 @@ function App() {
             <h2>Everything balances</h2>
 
             <p>
-              The full amount from the original till has been
-              accounted for.
+              The full amount from the original till has been accounted for.
             </p>
           </section>
 
@@ -431,8 +544,7 @@ function App() {
               <h2>Everything balances</h2>
 
               <p>
-                The Float and Takings add up to the original amount in
-                the till.
+                The Float and Takings add up to the original amount in the till.
               </p>
             </section>
           ) : (
@@ -440,8 +552,8 @@ function App() {
               <h2>The totals do not balance</h2>
 
               <p>
-                Go back and review the count and Change Bag
-                instructions before finishing.
+                Go back and review the count and Change Bag instructions before
+                finishing.
               </p>
             </section>
           )}
@@ -488,8 +600,7 @@ function App() {
               <h2>Good news</h2>
 
               <p>
-                You do not need to exchange any money through the
-                Change Bag.
+                You do not need to exchange any money through the Change Bag.
               </p>
             </section>
 
@@ -550,8 +661,7 @@ function App() {
           <h1>Use the Change Bag</h1>
 
           <p className="app-subtitle">
-            Follow each action in order. The app has done the maths
-            for you.
+            Follow each action in order. The app has done the maths for you.
           </p>
         </header>
 
@@ -560,8 +670,8 @@ function App() {
             <h2>What is happening?</h2>
 
             <p>
-              You are exchanging some Takings for the denominations
-              needed to complete the Float.
+              You are exchanging some Takings for the denominations needed to
+              complete the Float.
             </p>
           </section>
 
@@ -571,9 +681,7 @@ function App() {
             <div>
               <h2>Put into Change Bag</h2>
 
-              <QuantityList
-                items={changeBagPlan.depositItems}
-              />
+              <QuantityList items={changeBagPlan.depositItems} />
             </div>
           </section>
 
@@ -583,9 +691,7 @@ function App() {
             <div>
               <h2>Take out of Change Bag</h2>
 
-              <QuantityList
-                items={changeBagPlan.withdrawalItems}
-              />
+              <QuantityList items={changeBagPlan.withdrawalItems} />
             </div>
           </section>
 
@@ -594,18 +700,14 @@ function App() {
               <p className="destination-label">Put into</p>
               <h2>Float</h2>
 
-              <QuantityList
-                items={changeBagPlan.shortageItems}
-              />
+              <QuantityList items={changeBagPlan.shortageItems} />
             </section>
 
             <section className="destination-card">
               <p className="destination-label">Put into</p>
               <h2>Takings</h2>
 
-              <QuantityList
-                items={changeBagPlan.remainderItems}
-              />
+              <QuantityList items={changeBagPlan.remainderItems} />
             </section>
           </section>
 
@@ -613,8 +715,8 @@ function App() {
             <h2>Check before continuing</h2>
 
             <p>
-              Make sure the Float and Takings now contain exactly the
-              amounts shown above.
+              Make sure the Float and Takings now contain exactly the amounts
+              shown above.
             </p>
           </section>
 
@@ -670,10 +772,7 @@ function App() {
               <strong>Till</strong>
             </div>
 
-            <span
-              className="money-direction-arrow"
-              aria-hidden="true"
-            >
+            <span className="money-direction-arrow" aria-hidden="true">
               →
             </span>
 
@@ -683,10 +782,7 @@ function App() {
             </div>
           </section>
 
-          <section
-            className="takings-progress-card"
-            aria-live="polite"
-          >
+          <section className="takings-progress-card" aria-live="polite">
             <span>Takings so far</span>
             <strong>{formatCurrency(extrasTotal)}</strong>
           </section>
@@ -695,8 +791,8 @@ function App() {
             <h2>Before continuing</h2>
 
             <p>
-              Make sure all the listed extras have been physically
-              removed from the till and placed into Takings.
+              Make sure all the listed extras have been physically removed from
+              the till and placed into Takings.
             </p>
           </section>
 
@@ -803,19 +899,14 @@ function App() {
         <p className="app-eyebrow">Step 1 of 5</p>
         <h1>Count the Till</h1>
 
-        <p className="app-subtitle">
-          Count everything currently in the till.
-        </p>
+        <p className="app-subtitle">Count everything currently in the till.</p>
       </header>
 
       <main className="app-content">
         <section className="instruction-card">
           <h2>Enter each denomination</h2>
 
-          <p>
-            Use the buttons or type the number of notes and coins you
-            have.
-          </p>
+          <p>Use the buttons or type the number of notes and coins you have.</p>
         </section>
 
         <section
